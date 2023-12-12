@@ -1,0 +1,25 @@
+#getenv                  = True
+universe                = vanilla
+executable              = htcondor_executable.sh
+arguments               = $(ClusterId).$(ProcId)
+output                  = $(ClusterId).$(ProcId).out
+error                   = $(ClusterId).$(ProcId).err
+log                     = $(ClusterId).$(ProcId).log
+output_destination      = root://eosuser.cern.ch//eos/user/t/tprebiba/$(ClusterId)/
+MY.XRDCP_CREATE_DIR     = True
+transfer_output_files   = output/
++SingularityImage = "/cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch//fasvesta/space-charge-docker-image:latest"
+on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)
+max_retries = 0
+requirements = Machine =!= LastRemoteHost && regexp("100", Target.CUDADeviceName)
+request_GPUs = 1
+request_CPUs = 1
++MaxRunTime = 600000
+#queue
+#+JobFlavour             = "tomorrow"
+#+JobFlavour              = "testmatch"
+#MY.SingularityImage     = "/cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/fasvesta/space-charge-docker-image:latest"
+#request_gpus            = 1
+#requirements = regexp("100", TARGET.GPUs_DeviceName)
+queue
+
