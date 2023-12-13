@@ -109,7 +109,7 @@ elif p['include_injection_chicane_correction']==1:
                             * line.functions.fun_qd3_corr(line.vars['t_turn_s']))
     line.vars['kbrqd14corr'] = (line.vars['on_chicane_beta_corr']
                             * line.functions.fun_qd14_corr(line.vars['t_turn_s']))
-    print('Variables "on_chicane_tune_corr" and "on_chicane_beta_corr" controls the scalling of the tune & beta-beating correction.')
+    print('Variables "on_chicane_tune_corr" and "on_chicane_beta_corr" control the scaling of the tune & beta-beating correction.')
     print('Beta-beating correction function assigned to quadrupoles.')
 
 

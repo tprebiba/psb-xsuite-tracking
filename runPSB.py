@@ -21,9 +21,9 @@ if GPU_FLAG:
 #############################
 # Load parameters
 #############################
+from simulation_parameters import parameters as p
 source_dir = os.getcwd() + '/'
 #source_dir = '/afs/cern.ch/user/t/tprebiba/workspace/000_PSB_half-integer_dynamic_crossing_PIC_reference/'
-from simulation_parameters import parameters as p
 with open(source_dir+'tables/tunes.json', 'r') as fid:
      d = json.load(fid)
 for key in d:
@@ -38,30 +38,17 @@ if GPU_FLAG:
     context = xo.ContextCupy()
 else:
     context = xo.ContextCpu()
-line = xt.Line.from_json(source_dir+'psb/psb_line.json')
+line = xt.Line.from_json(source_dir+'psb/psb_line_thin.json')
 Cpsb = line.get_length() # 157.08 m
 print('Loaded PSB line')
 
 
 #%%
 #############################
-# Prepare tune ramp
-#############################
-if p['ramp_tunes_flag']:
-     #line.vars['kbrqf'] = line.functions.kbrqf_func(line.vars['t_turn_s'])
-     #line.vars['kbrqd'] = line.functions.kbrqd_func(line.vars['t_turn_s'])
-     #print('Tune will be ramped.')
-     pass
-     
-
-
-#%%
-#############################
 # Install space charge nodes
 #############################
-space_charge = True
-if space_charge:
-    mode = 'pic' # 'frozen' or 'pic' or 'quasi-frozen'
+if p['install_space_charge']:
+    mode = p['space_charge_mode']
     print(f'Installing space charge in {mode} mode')
     # install nodes in lattice frozen-like (exact parameters do not matter if pic is used)
     lprofile = xf.LongitudinalProfileQGaussian(number_of_particles=p['bunch_intensity'], 
@@ -104,30 +91,8 @@ else:
 #############################
 line.build_tracker(_context=context)
 print('Tracker built')
-deactivate_spacecharge = False
-if deactivate_spacecharge:
-      line = line.filter_elements(exclude_types_starting_with='SpaceCh') # to remove space charge
-      print('Space charge deactivated (filtered line)')
-
-
-#%%
-#############################
-# Correct chroma
-#############################
-line.match(vary=[xt.Vary('kbr1xnoh0', step=1e-8)],
-           targets = [xt.Target('dqy', 0.0, tol=1e-5)])
-print('Chroma corrected')
-
-
-#%%
-#############################
-# Add half-integer excitation
-#############################
-line.vars['kbr1qno816l3'] = p['kbr1qno816l3']
-line.vars['kbr1qno412l3'] = p['kbr1qno412l3']
-print('Half-integer excitation added')
-print('kbr1qno816l3=', p['kbr1qno816l3'])
-print('kbr1qno412l3=', p['kbr1qno412l3'])
+line_sc_off = line.filter_elements(exclude_types_starting_with='SpaceCh') # to remove space charge
+print('Keeping line_sc_off: line without space charge knobs.')
 
 
 #%%
@@ -213,12 +178,6 @@ print('Now start tracking...')
 start = time.time()
 for ii in range(num_turns):
       print(f'Turn {ii} out of {num_turns}')
-
-      # ramp quadrupoles: not needed when using the kbrqf_func and kbrqd_func
-      line.vars['kbrqf'] = p['kf_ini'] + (p['kf_fin']-p['kf_ini'])*ii/num_turns
-      line.vars['kbrqd'] = p['kd_ini'] + (p['kd_fin']-p['kd_ini'])*ii/num_turns
-      print('Model Qx = ', p['qx_ini'] + (p['qx_fin']-p['qx_ini'])*ii/num_turns)
-      print('Model Qy = ', p['qy_ini'] + (p['qy_fin']-p['qy_ini'])*ii/num_turns)
 
       # keep particles within circumference
       particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2

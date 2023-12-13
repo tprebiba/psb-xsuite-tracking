@@ -24,13 +24,16 @@ python 002A_include_injection_chicane.py
 python 002B_include_injection_chicane_correction.py
 
 # prepare acceleration
-#python 003_prepare_acceleration.py
-
-# Particle distribution (multi-turn injection)
-python 004_generate_particle_distribution.py
+python 003_prepare_acceleration.py
 
 # Configure xsuite line for tracking (slicing, re-matching, etc.)
-python 005_prepare_for_tracking.py
+python 004_prepare_for_tracking.py
 
 # Configure tune ramp
-python 006_prepare_tune_ramp.py
+python 005_prepare_tune_ramp.py
+
+# Include lattice imperfections (chroma, field errors, etc.)
+python 006_lattice_imperfections.py
+
+# Particle distribution (multi-turn injection)
+python 007_generate_particle_distribution.py
