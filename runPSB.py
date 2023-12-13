@@ -1,20 +1,15 @@
 #%%
 import xtrack as xt
-import xpart as xp
 import xobjects as xo
 import xfields as xf
+import xpart as xp
 import numpy as np
 import json
 import time
 import os
 
-from lib.parabolic_longitudinal_distribution import parabolic_longitudinal_distribution
 #from statisticalEmittance.statisticalEmittance import statisticalEmittance as stE
 from lib.statisticalEmittance import StatisticalEmittance as stE
-
-GPU_FLAG = True
-if GPU_FLAG:
-    import cupy as cp
 
 
 #%%
@@ -24,20 +19,18 @@ if GPU_FLAG:
 from simulation_parameters import parameters as p
 source_dir = os.getcwd() + '/'
 #source_dir = '/afs/cern.ch/user/t/tprebiba/workspace/000_PSB_half-integer_dynamic_crossing_PIC_reference/'
-with open(source_dir+'tables/tunes.json', 'r') as fid:
-     d = json.load(fid)
-for key in d:
-     p[key] = d[key]
+if p['prepare_tune_ramp']:
+    with open(source_dir+'time_tables/tunes.json', 'r') as fid:
+        d = json.load(fid)
+    for key in d:
+        p[key] = d[key]
 
 
 #%%
 #############################
 # Load PSB line
 #############################
-if GPU_FLAG:
-    context = xo.ContextCupy()
-else:
-    context = xo.ContextCpu()
+context = p['context']
 line = xt.Line.from_json(source_dir+'psb/psb_line_thin.json')
 Cpsb = line.get_length() # 157.08 m
 print('Loaded PSB line')
@@ -97,67 +90,21 @@ print('Keeping line_sc_off: line without space charge knobs.')
 
 #%%
 #############################
-# Generate particles 
+# Get particles from input
 #############################
-#particles = xp.generate_matched_gaussian_bunch(_context=context, num_particles=p['n_part'],
-#                            total_intensity_particles=p['bunch_intensity'],
-#                            nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'], sigma_z=p['sigma_z'],
-#                            particle_ref=line.particle_ref,
-#                            tracker=tracker_sc_off)
-particles = parabolic_longitudinal_distribution(_context=context, num_particles=p['n_part'],
-                            total_intensity_particles=p['bunch_intensity'],
-                            nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'], sigma_z=p['sigma_z'],
-                            particle_ref=line.particle_ref,
-                            line=line,
-                            #line=line_sc_off
-                            )
-# "Force" coasting beam
-if GPU_FLAG:
-    particles.zeta = cp.random.uniform(-Cpsb/2, Cpsb/2, p['n_part'])
-    print('Forcing coasting beam using cupy.')
-else:
-    particles.zeta = np.random.uniform(-Cpsb/2, Cpsb/2, p['n_part'])
-    print('Forcing coasting beam using numpy.')
-#particles.delta = np.random.uniform(-1.36e-3, 1.36e-3, n_part) # not parabolic
-with open(source_dir+'input/particles_initial.json', 'w') as fid:
-      json.dump(particles.to_dict(), fid, cls=xo.JEncoder)
-print('Number of macroparticles: ', p['n_part'])
-print('Particles generated and saved to inputs/particles_initial.json')
-
-
-#%%
-#############################
-# Switch OFF RFs
-#############################
-RF = False
-if not RF:
-    #line_table = line.get_table()
-    #element_mask = np.where(line_table['element_type']=='Cavity')[0]
-    #for i in element_mask:
-    #    cav_name = line_table['name'][i]
-    #    line.element_refs[cav_name].voltage = 0
-    #    line.element_refs[cav_name].frequency = 0
-    cav_name = 'br.c02'
-    line.element_refs[cav_name].voltage = 0
-    line.element_refs[cav_name].frequency = 0
-    print('RFs switched off')
-    try:
-        line.twiss()
-    except:
-         print('Twiss failed (as it should).')
-else:
-    print('RFs kept on.')
+with open(source_dir+'input/particles_initial.json', 'r') as fid:
+     particles = xp.Particles.from_dict(json.load(fid), _context=context)
 
 
 #%%
 #############################
 # Last configs
 #############################
-#line.enable_time_dependent_vars = True
-#line.dt_update_time_dependent_vars = 3e-6 # approximately every 3 turns
+line.enable_time_dependent_vars = True
+line.dt_update_time_dependent_vars = 3e-6 # approximately every 3 turns
 #line.vars.cache_active = False
 output = []
-if GPU_FLAG:
+if p['GPU_FLAG']:
     r = stE(context='GPU')
 else:
     r = stE(context='CPU')
@@ -166,7 +113,6 @@ print(bunch_moments['nemitt_x'])
 print(bunch_moments['nemitt_y'])
 output=[]
 #np.save(source_dir+'output/distribution_thin_seq', r.coordinate_matrix)
-
 
 
 #%%

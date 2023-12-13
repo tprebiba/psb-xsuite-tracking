@@ -65,15 +65,15 @@ if (thin>0){
 };
 
 ! Install a dummy RF cavity
-!CAVFINEM	: RFCAVITY, L:= 1e-6, VOLT:= 0.008, HARMON = 1, LAG:= 0.0, no_cavity_totalpath;
-!select, flag = seqedit, clear;
+CAVFINEM	: RFCAVITY, L:= 1e-6, VOLT:= 0.008*0, HARMON = 1, LAG:= 0.0, no_cavity_totalpath;
+select, flag = seqedit, clear;
 !select, flag = seqedit, class=BR_ACWFB;
-!seqedit, sequence = psb1;
-!flatten;
+seqedit, sequence = psb1;
+flatten;
 !remove, element = selected;
-!install, element = BR.C02, class=CAVFINEM, at=-1.8 ,from=BR.BHZ51;
-!flatten;
-!endedit;
+install, element = BR.C02, class=CAVFINEM, at=-1.8-1.5, from=BR.BHZ51;
+flatten;
+endedit;
 
 use, sequence=psb1;
 

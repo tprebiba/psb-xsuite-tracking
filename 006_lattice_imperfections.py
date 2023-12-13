@@ -20,15 +20,20 @@ if p['correct_chroma']:
     line.match(vary=[xt.Vary('kbr1xnoh0', step=1e-8)],
                targets = [xt.Target('dq%s'%(p['chroma_plane']), 0.0, tol=1e-5)])
     print('Chromaticity corrected.')
+else:
+    print('Natural chromaticity.')
 
 
 #########################################
 # Add field errors
 #########################################
-print('Adding field errors.')
-for key in p['field_errors']:
-    line.vars[key] = p['field_errors'][key]
-    print('Added %s = %s to the lattice.'%(key, p['field_errors'][key]))
+if p['include_field_errors']:
+    print('Adding field errors.')
+    for key in p['field_errors']:
+        line.vars[key] = p['field_errors'][key]
+        print('Added %s = %s to the lattice.'%(key, p['field_errors'][key]))
+else:
+    print('No field errors.')
 
 
 #########################################

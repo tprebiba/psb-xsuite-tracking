@@ -8,11 +8,11 @@ print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 print('005_prepare_tune_ramp.py')
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 
-if p['include_injection_chicane']==0:
+if p['prepare_tune_ramp']==0:
     print('include_injection_chicane = 0')
     print('Tunes will remain constant.')
 
-elif p['include_injection_chicane']==1:
+elif p['prepare_tune_ramp']==1:
 
       #########################################
       # Load PSB line in xsuite

@@ -13,6 +13,8 @@ if p['prepare_acceleration']==0:
     print('No acceleration included.')
 
 elif p['prepare_acceleration']==1:
+    print('prepare_acceleration = 1')
+    print('Double RF; with acceleration.')
 
     #########################################
     # Load PSB line in xsuite
@@ -93,6 +95,32 @@ elif p['prepare_acceleration']==1:
     line.vars['t_turn_s']=0.0 # Reset time at the injection
     #line.twiss_default['method'] = '6d' # now with cavity
     #print('Twiss method set to 6d.')
+    line.twiss()
+    line.to_json('psb/psb_line_thick.json')
+    print('Line saved to psb/psb_line_thick.json')
+
+elif p['prepare_acceleration']==2: 
+    print('prepare_acceleration = 2')
+    print('Single RF; no acceleration included.')
+
+    #########################################
+    # Load PSB line in xsuite
+    #########################################
+    line = xt.Line.from_json('psb/psb_line_thick.json')
+    line.build_tracker()
+
+    #########################################
+    # Add constant voltage to the dummy RF
+    #########################################
+    line.element_refs['br.c02'].voltage = 0.008*1e6
+    print('Constant voltage = 8 kV added to the dummy RF.')
+
+    #########################################
+    # Save line to .json
+    #########################################
+    line.vars['t_turn_s']=0.0 # Reset time at the injection
+    line.twiss_default['method'] = '6d' # now with cavity
+    print('Twiss method set to 6d.')
     line.twiss()
     line.to_json('psb/psb_line_thick.json')
     print('Line saved to psb/psb_line_thick.json')

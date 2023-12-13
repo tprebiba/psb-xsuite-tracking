@@ -18,7 +18,7 @@ mad.globals.slices = 0
 mad.globals.QH = p['qx_ini']
 mad.globals.QV = p['qy_ini']
 mad.chdir('psb')
-mad.call('psb_flat_bottom.madx')
+mad.call('psb_flat_bottom.madx') # note that a single cavity is installed close to the main one (br.c02)
 line= xt.Line.from_madx_sequence(mad.sequence['psb1'],
                                  deferred_expressions=True,
                                  install_apertures=True,
@@ -61,3 +61,4 @@ print('Twiss computed and saved to psb/psb_twiss_thick.pkl.')
 print('Working point of thick lattice: (Qx, Qy) = (%s, %s)'%(tw.qx, tw.qy))
 line.to_json('psb/psb_line_thick.json')
 print('Line saved to psb/psb_line_thick.json')
+# %%
