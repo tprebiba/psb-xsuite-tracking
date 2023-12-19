@@ -7,16 +7,16 @@ import matplotlib.pyplot as plt
 #%%
 png_dir = './'
 #source_dir = '../input/'
-#source_dir = '../output/'
+source_dir = '../output/'
 #source_dir = '/home/tprebiba/eos/5633787/output/'
-source_dir = '/home/tprebiba/eos/2637644/output/'
+#source_dir = '/home/tprebiba/eos/2637644/output/'
 #source_dir = '/afs/cern.ch/user/t/tprebiba/temp/'
 files = glob.glob(source_dir+'*.json')
 #print(files)
 
 #%%
 df = {}
-for file in files[10:20]:
+for file in files[0::]:
     #print(file)
     #turn = int(file.split('/')[-1].split('_')[-1][0:5])
     df[file] = pd.read_json(file)
@@ -24,8 +24,8 @@ for file in files[10:20]:
 
 
 #%%
-#for file in files[-10::]:
-for file in files[10:20]:
+for file in files[0::]:
+#for file in files[10:20]:
     print(file)
 
     try:
@@ -39,7 +39,7 @@ for file in files[10:20]:
     z = df[file]['zeta']
     dE = df[file]['ptau']*df[file]['p0c']/1e6
 
-    bins=300 #500
+    bins=100 #500
     my_cmap = plt.cm.jet
     my_cmap.set_under('w',0.1)
     #f, axs = plt.subplots(2,2,figsize=(10,8),facecolor='white')

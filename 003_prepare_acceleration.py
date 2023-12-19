@@ -95,7 +95,7 @@ elif p['prepare_acceleration']==1:
     line.vars['t_turn_s']=0.0 # Reset time at the injection
     #line.twiss_default['method'] = '6d' # now with cavity
     #print('Twiss method set to 6d.')
-    line.twiss()
+    #line.twiss(zeta0=0.3) # double RF unstable at zeta=0
     line.to_json('psb/psb_line_thick.json')
     print('Line saved to psb/psb_line_thick.json')
 

@@ -33,7 +33,7 @@ if p['prepare_tune_ramp']:
 context = p['context']
 line = xt.Line.from_json(source_dir+'psb/psb_line_thin.json')
 Cpsb = line.get_length() # 157.08 m
-print('Loaded PSB line')
+print('Loaded PSB line from psb/psb_line_thin.json.')
 
 
 #%%
@@ -92,8 +92,44 @@ print('Keeping line_sc_off: line without space charge knobs.')
 #############################
 # Get particles from input
 #############################
-with open(source_dir+'input/particles_initial.json', 'r') as fid:
-     particles = xp.Particles.from_dict(json.load(fid), _context=context)
+if p['particle_distribution'] == 'simulated':
+    print('Simulated particle distribution.')
+    with open(source_dir+'input/particles_initial.json', 'r') as fid:
+        particles = xp.Particles.from_dict(json.load(fid), _context=context)
+    print('Loaded particles from input/particles_initial.json.')
+elif p['particle_distribution'] == 'real':
+    print('Real particle distribution.')
+    with open('input/part_for_injection.json', 'r') as fid:
+        part_for_injection = xp.Particles.from_dict(json.load(fid), _context=context)
+    print('Loaded particles from input/part_for_injection.json.')
+
+
+#%%
+#############################
+# Multi-turn injection
+#############################
+if p['particle_distribution'] == 'real':
+    ###############################
+    # Build and insert multi-turn
+    # injection element 
+    ###############################
+    print('Building and inserting multi-turn injection element to PSB lattice.')
+    print('Number of injections: ', p['num_injections'])
+    print('Number of particles per injection: ', p['n_part']/p['num_injections'])
+    p_injection = xt.ParticlesInjectionSample(particles_to_inject=part_for_injection,
+                                              line=line,
+                                              element_name='injection',
+                                              num_particles_to_inject=p['n_part']/p['num_injections'])
+    line.discard_tracker()
+    line.insert_element(index='bi1.tstr1l1', element=p_injection, name='injection')
+    line.build_tracker()
+
+    ###############################
+    # Generate particle object with 
+    # unallocated space
+    ###############################
+    particles = line.build_particles(_capacity=p['n_part'], x=0)
+    particles.state[0] = -500 # kill the particle added by default
 
 
 #%%
@@ -101,8 +137,9 @@ with open(source_dir+'input/particles_initial.json', 'r') as fid:
 # Last configs
 #############################
 line.enable_time_dependent_vars = True
-line.dt_update_time_dependent_vars = 3e-6 # approximately every 3 turns
-#line.vars.cache_active = False
+#line.dt_update_time_dependent_vars = 3e-6 # approximately every 3 turns
+line.vars.cache_active = False
+line.vars['t_turn_s'] = 0.0
 output = []
 if p['GPU_FLAG']:
     r = stE(context='GPU')
@@ -119,14 +156,22 @@ output=[]
 #############################
 # Start tracking
 #############################
+intensity = []
 num_turns = p['num_turns']
 print('Now start tracking...')
 start = time.time()
 for ii in range(num_turns):
       print(f'Turn {ii} out of {num_turns}')
 
+      # multi-turn injection
+      if p['particle_distribution'] == 'real':
+        if ii == p['num_injections']:
+            p_injection.num_particles_to_inject = 0
+        print('Stopping...')
+        intensity.append(particles.weight[particles.state>0].sum())
+
       # keep particles within circumference
-      particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2
+      #particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2
       
       # track one turn
       line.track(particles, turn_by_turn_monitor=True)
@@ -138,18 +183,14 @@ for ii in range(num_turns):
       output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist()])
       
       # save every some turns
-      ii2save = [100, 200, 1000, 10000, 20000, 30000, 40000, 50000]
-      #ii2save = [10000, 14000, 16000, 18000, 20000, 22000, 24000, 26000, 28000, 30000, 32000, 34000]
-      #ii2save = [1000, 200, 300, 40, 50, 100, 2000, 3000]
-      if (ii in ii2save) or (ii > 50000):
-            if ii%1000==0:
-            #if True:
-                print(f'save turn {ii}')
-                with open(source_dir+f'output/particles_turn_{ii:05d}.json', 'w') as fid:
-                    json.dump(particles.to_dict(), fid, cls=xo.JEncoder)
-                np.save(source_dir+'output/distribution_'+str(int(ii)), r.coordinate_matrix)
-                ouput=np.array(output)
-                np.save(source_dir+'output/emittances', output)
+      if ii in p['turns2saveparticles']:
+        print(f'save turn {ii}')
+        with open(source_dir+f'output/particles_turn_{ii:05d}.json', 'w') as fid:
+            json.dump(particles.to_dict(), fid, cls=xo.JEncoder)
+        np.save(source_dir+'output/distribution_'+str(int(ii)), r.coordinate_matrix)
+        ouput=np.array(output)
+        np.save(source_dir+'output/emittances', output)
+
 end = time.time()
 bunch_moments=r.measure_bunch_moments(particles)
 print('epsn_x = ',bunch_moments['nemitt_x'])

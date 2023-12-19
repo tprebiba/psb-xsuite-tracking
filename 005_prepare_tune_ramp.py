@@ -9,7 +9,7 @@ print('005_prepare_tune_ramp.py')
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 
 if p['prepare_tune_ramp']==0:
-    print('include_injection_chicane = 0')
+    print('prepare_tune_ramp = 0')
     print('Tunes will remain constant.')
 
 elif p['prepare_tune_ramp']==1:
