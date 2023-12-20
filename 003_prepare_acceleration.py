@@ -93,9 +93,11 @@ elif p['prepare_acceleration']==1:
     # Save line to .json
     #########################################
     line.vars['t_turn_s']=0.0 # Reset time at the injection
-    #line.twiss_default['method'] = '6d' # now with cavity
-    #print('Twiss method set to 6d.')
-    #line.twiss(zeta0=0.3) # double RF unstable at zeta=0
+    if p['twiss_mode']=='6d':
+        line.twiss_default['method'] = '6d' # now with cavity
+        print('Twiss method set to 6d.')
+        print('Guessing fixed point location at zeta0=%1.2f m.'%p['zeta0'])
+        line.twiss(zeta0=p['zeta0']) # double RF unstable at zeta=0, guessing fixed point location at z=p['zeta0'] m
     line.to_json('psb/psb_line_thick.json')
     print('Line saved to psb/psb_line_thick.json')
 

@@ -57,7 +57,9 @@ include_injection_chicane_correction = 0 # if 1, 002B_include_injection_chicane_
 on_chicane_tune_corr = 1 # if 1, activates tune correction of injection chicane
 on_chicane_beta_corr = 1 # if 1, activates beta correction of injection chicane
 
-prepare_acceleration = 2 # 0: ignore acceleration, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF)
+prepare_acceleration = 1 # 0: ignore acceleration, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF)
+twiss_mode = '4d' # '4d' or '6d
+zeta0 = 17.5 # if double RF, 6d-twiss at zeta0=0 fails because is unstable fixed point; this is a guess of the stable fixed point
 
 slices = 3 # number of slices in thin lattice
 # to have the starting point of the lattice at a different location, None otherwise
@@ -113,6 +115,8 @@ parameters = {
     'on_chicane_tune_corr': on_chicane_tune_corr,
     'on_chicane_beta_corr': on_chicane_beta_corr,
     'prepare_acceleration': prepare_acceleration,
+    'twiss_mode': twiss_mode,
+    'zeta0': zeta0,
     'slices': slices,
     'element_to_cycle': element_to_cycle,
     'prepare_tune_ramp': prepare_tune_ramp,
