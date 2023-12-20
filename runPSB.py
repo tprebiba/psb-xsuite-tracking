@@ -11,11 +11,10 @@ import os
 #from statisticalEmittance.statisticalEmittance import statisticalEmittance as stE
 from lib.statisticalEmittance import StatisticalEmittance as stE
 
-
 #%%
-#############################
+#########################################
 # Load parameters
-#############################
+#########################################
 from simulation_parameters import parameters as p
 source_dir = os.getcwd() + '/'
 #source_dir = '/afs/cern.ch/user/t/tprebiba/workspace/000_PSB_half-integer_dynamic_crossing_PIC_reference/'
@@ -25,21 +24,19 @@ if p['prepare_tune_ramp']:
     for key in d:
         p[key] = d[key]
 
-
 #%%
-#############################
+#########################################
 # Load PSB line
-#############################
+#########################################
 context = p['context']
 line = xt.Line.from_json(source_dir+'psb/psb_line_thin.json')
 Cpsb = line.get_length() # 157.08 m
 print('Loaded PSB line from psb/psb_line_thin.json.')
 
-
 #%%
-#############################
+#########################################
 # Install space charge nodes
-#############################
+#########################################
 if p['install_space_charge']:
     mode = p['space_charge_mode']
     print(f'Installing space charge in {mode} mode')
@@ -77,21 +74,19 @@ if p['install_space_charge']:
 else:
      print('Skipping space charge...')
 
-
 #%%
-#############################
+#########################################
 # Build tracker
-#############################
+#########################################
 line.build_tracker(_context=context)
 print('Tracker built')
-line_sc_off = line.filter_elements(exclude_types_starting_with='SpaceCh') # to remove space charge
-print('Keeping line_sc_off: line without space charge knobs.')
-
+#line_sc_off = line.filter_elements(exclude_types_starting_with='SpaceCh') # to remove space charge
+#print('Keeping line_sc_off: line without space charge knobs.')
 
 #%%
-#############################
+#########################################
 # Get particles from input
-#############################
+#########################################
 if p['particle_distribution'] == 'simulated':
     print('Simulated particle distribution.')
     with open(source_dir+'input/particles_initial.json', 'r') as fid:
@@ -103,39 +98,34 @@ elif p['particle_distribution'] == 'real':
         part_for_injection = xp.Particles.from_dict(json.load(fid), _context=context)
     print('Loaded particles from input/part_for_injection.json.')
 
-
 #%%
-#############################
-# Multi-turn injection
-#############################
 if p['particle_distribution'] == 'real':
-    ###############################
-    # Build and insert multi-turn
-    # injection element 
-    ###############################
-    print('Building and inserting multi-turn injection element to PSB lattice.')
-    print('Number of injections: ', p['num_injections'])
-    print('Number of particles per injection: ', p['n_part']/p['num_injections'])
-    p_injection = xt.ParticlesInjectionSample(particles_to_inject=part_for_injection,
-                                              line=line,
-                                              element_name='injection',
-                                              num_particles_to_inject=p['n_part']/p['num_injections'])
-    line.discard_tracker()
-    line.insert_element(index='bi1.tstr1l1', element=p_injection, name='injection')
-    line.build_tracker()
+    #########################################
+    # Build and insert multi-turn injection element 
+    #########################################
+    if 'injection' not in line.element_names:
+        print('Building and inserting multi-turn injection element to PSB lattice.')
+        print('Number of injections: ', p['num_injections'])
+        print('Number of macroparticles per injection: ', int(p['n_part']/p['num_injections']))
+        p_injection = xt.ParticlesInjectionSample(particles_to_inject=part_for_injection,
+                                                  line=line,
+                                                  element_name='injection',
+                                                  num_particles_to_inject=int(p['n_part']/p['num_injections']))
+        line.discard_tracker()
+        line.insert_element(index='bi1.tstr1l1', element=p_injection, name='injection')
+        line.build_tracker()
 
-    ###############################
-    # Generate particle object with 
-    # unallocated space
-    ###############################
-    particles = line.build_particles(_capacity=p['n_part'], x=0)
+    #########################################
+    # Generate particle object with unallocated space
+    #########################################
+    print('Generating particle object with unallocated space.')
+    particles = line.build_particles(_capacity=p['n_part']+1, x=0)
     particles.state[0] = -500 # kill the particle added by default
 
-
 #%%
-#############################
+#########################################
 # Last configs
-#############################
+#########################################
 line.enable_time_dependent_vars = True
 #line.dt_update_time_dependent_vars = 3e-6 # approximately every 3 turns
 line.vars.cache_active = False
@@ -145,59 +135,57 @@ if p['GPU_FLAG']:
     r = stE(context='GPU')
 else:
     r = stE(context='CPU')
-bunch_moments=r.measure_bunch_moments(particles)
-print(bunch_moments['nemitt_x'])
-print(bunch_moments['nemitt_y'])
 output=[]
-#np.save(source_dir+'output/distribution_thin_seq', r.coordinate_matrix)
-
+intensity = []
 
 #%%
-#############################
+#########################################
 # Start tracking
-#############################
-intensity = []
+#########################################
 num_turns = p['num_turns']
 print('Now start tracking...')
 start = time.time()
 for ii in range(num_turns):
-      print(f'Turn {ii} out of {num_turns}')
+    print(f'Turn {ii} out of {num_turns}')
 
-      # multi-turn injection
-      if p['particle_distribution'] == 'real':
+    # multi-turn injection
+    if p['particle_distribution'] == 'real':
         if ii == p['num_injections']:
             p_injection.num_particles_to_inject = 0
-        print('Stopping...')
+            print('Injection finished.')
+        elif ii<p['num_injections']:
+            print('Injecting %i macroparticles.'%(int(p['n_part']/p['num_injections'])))
         intensity.append(particles.weight[particles.state>0].sum())
 
-      # keep particles within circumference
-      #particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2
-      
-      # track one turn
-      line.track(particles, turn_by_turn_monitor=True)
-      #t = line.twiss(method='4d')
-      #print(t.qx, t.qy)
-      
-      # update output
-      bunch_moments=r.measure_bunch_moments(particles)
-      output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist()])
-      
-      # save every some turns
-      if ii in p['turns2saveparticles']:
-        print(f'save turn {ii}')
+    # if coasting, keep particles within circumference (not very accurate)
+    if p['longitudinal_shape'] == 'coasting':
+        particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2
+
+    # track one turn
+    #line.track(particles, turn_by_turn_monitor=True)
+    line.track(particles, num_turns=1)
+
+    # update output
+    bunch_moments=r.measure_bunch_moments(particles)
+    output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist()])
+
+    # save every some turns
+    if ii in p['turns2saveparticles']:
+        print(f'Saving turn {ii}')
         with open(source_dir+f'output/particles_turn_{ii:05d}.json', 'w') as fid:
             json.dump(particles.to_dict(), fid, cls=xo.JEncoder)
+            print(f'Particles saved to output/particles_turn_{ii:05d}.json.')
         np.save(source_dir+'output/distribution_'+str(int(ii)), r.coordinate_matrix)
+        print(f'Distribution saved to output/distribution_{ii}.npy.')
         ouput=np.array(output)
         np.save(source_dir+'output/emittances', output)
+        print(f'Emittances saved to output/emittances.npy.')
 
 end = time.time()
-bunch_moments=r.measure_bunch_moments(particles)
-print('epsn_x = ',bunch_moments['nemitt_x'])
-print('epsn_y = ',bunch_moments['nemitt_y'])
-print('eps_z = ',bunch_moments['emitt_z'])
-print('time = ', end - start)
-ouput=np.array(output)
+print('Tracking finished.')
+print('Total seconds = ', end - start)
 np.save(source_dir+'output/emittances', output)
+print(f'Emittances saved to output/emittances.npy.')
+#print('Final x and y emittances: ', bunch_moments['nemitt_x'].tolist()[-1], bunch_moments['nemitt_y'].tolist()[-1])
 
 # %%

@@ -77,7 +77,7 @@ elif p['particle_distribution'] == 'real':
     # Load particles for multiturn 
     # injection
     ###############################
-    fname = 'L4_particle_distribution/inj_distrib.dat'
+    fname = 'L4_particle_distribution/atPSBfoil-450keV.txt'
     print('Reading %s.'%fname)
     df = pd.read_table(fname, skiprows=3,
         names="x x' y y' z z' Phase Time Energy Loss".split())
@@ -93,7 +93,8 @@ elif p['particle_distribution'] == 'real':
     part_for_injection.zeta = df.z.values * 1e-3
     part_for_injection.px = df["x'"].values * 1e-3 * (1 + part_for_injection.delta)
     part_for_injection.py = df["y'"].values * 1e-3 * (1 + part_for_injection.delta)
-    part_for_injection.weight = 1e10
+    part_for_injection.weight = p['macrosize']
+    print('Macrosize = ', p['macrosize'])
     with open('input/part_for_injection.json', 'w') as fid:
         json.dump(part_for_injection.to_dict(), fid, cls=xo.JEncoder)
     print('Saved %s to part_for_injection.json.'%fname)

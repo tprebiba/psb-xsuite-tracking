@@ -6,15 +6,15 @@ import numpy as np
 #######################################
 #num_turns = 100000 # number of turns to track
 num_turns = 100
-turns2saveparticles = [20,50, num_turns-1]
+turns2saveparticles = [1,2,5,10,20,50, 100,500, 1000, 2000, num_turns-1]
 
 #######################################
 # 2) Beam parameters
 #######################################
 #n_part = int(5e5) #int(5e5) # number of macroparticles: 2e5 were used in pyorbit
-n_part = int(1e2)
-
+n_part = int(1e5)
 bunch_intensity = 40.0e10 # number of particles per bunch
+macrosize = bunch_intensity/n_part # number of particles (charges) per macroparticle
 
 particle_distribution = 'real'
 if particle_distribution == 'simulated':
@@ -28,7 +28,7 @@ elif particle_distribution == 'real':
     nemitt_y = np.nan
     sigma_z = np.nan
     longitudinal_shape = np.nan
-    num_injections = 2
+    num_injections = 3
 
 qx_ini = 4.40
 qy_ini = 4.45
@@ -36,8 +36,8 @@ qy_ini = 4.45
 #######################################
 # 3) Lattice imperfections
 #######################################
-correct_chroma = False # if True, correct vertical chromaticity
-chroma_plane = 'y' # 'x' or 'y'
+correct_chroma = False # if True, correct chromaticity
+chroma_plane = 'y' # to correct horizontal ('x') or vertical ('y') chromaticity
 
 # Half-integer excitation (deltaI_816 = -2A)
 include_field_errors = False
@@ -63,7 +63,9 @@ zeta0 = 17.5 # if double RF, 6d-twiss at zeta0=0 fails because is unstable fixed
 
 slices = 3 # number of slices in thin lattice
 # to have the starting point of the lattice at a different location, None otherwise
-element_to_cycle = 'br1.bwsv11l1' # vertical LIU wire scanner
+element_to_cycle = None # line starts at the start of the 1st sector (NOT at the stripping foil)
+#element_to_cycle = 'bi1.tstr1l1' # stripping foil
+#element_to_cycle = 'br1.bwsv11l1' # vertical LIU wire scanner
 
 prepare_tune_ramp = 0 # if 1, 004_prepare_tune_ramp.py is executed
 on_tune_ramp = 1 # if 1, activates tune ramp
@@ -74,6 +76,7 @@ install_space_charge = False
 space_charge_mode = 'frozen' # 'frozen' or 'pic' or 'quasi-frozen'
 num_spacecharge_interactions = 160 # space charge interactions per turn
 tol_spacecharge_position = 1e-2 # minimum/maximum space between sc elements
+#tol_spacecharge_position = None # ?
 
 GPU_FLAG = False # if True, GPU is used
 if GPU_FLAG:
@@ -92,6 +95,7 @@ parameters = {
     # Beam parameters
     'n_part': n_part,
     'bunch_intensity': bunch_intensity,
+    'macrosize': macrosize,
     'particle_distribution': particle_distribution,
     'nemitt_x': nemitt_x,
     'nemitt_y': nemitt_y,
