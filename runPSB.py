@@ -49,8 +49,7 @@ if p['install_space_charge']:
                     longitudinal_profile=lprofile,
                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'],
                     sigma_z=p['sigma_z'],
-                    num_spacecharge_interactions=p['num_spacecharge_interactions'],
-                    tol_spacecharge_position=p['tol_spacecharge_position'])
+                    num_spacecharge_interactions=p['num_spacecharge_interactions'])
     if mode == 'frozen':
         pass # Already configured in line
     # switch to pic or quasi-frozen

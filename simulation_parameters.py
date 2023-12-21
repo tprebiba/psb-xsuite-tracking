@@ -12,14 +12,14 @@ turns2saveparticles = [1,2,5,10,20,50, 100,500, 1000, 2000, num_turns-1]
 # 2) Beam parameters
 #######################################
 #n_part = int(5e5) #int(5e5) # number of macroparticles: 2e5 were used in pyorbit
-n_part = int(1e5)
+n_part = int(1e4)
 bunch_intensity = 40.0e10 # number of particles per bunch
 macrosize = bunch_intensity/n_part # number of particles (charges) per macroparticle
 
-particle_distribution = 'real'
+particle_distribution = 'simulated'
 if particle_distribution == 'simulated':
-    nemitt_x = 1.05e-6 # normalized emittance in x
-    nemitt_y = 0.62e-6 # normalized emittance in y
+    nemitt_x = 1.2e-6 # normalized emittance in x
+    nemitt_y = 1.0e-6 # normalized emittance in y
     sigma_z = (400/4)*0.525*0.3 # bunch length in m
     longitudinal_shape = 'parabolic' # 'parabolic' or 'coasting' or 'gaussian'
     num_injections = 1
@@ -57,7 +57,7 @@ include_injection_chicane_correction = 0 # if 1, 002B_include_injection_chicane_
 on_chicane_tune_corr = 1 # if 1, activates tune correction of injection chicane
 on_chicane_beta_corr = 1 # if 1, activates beta correction of injection chicane
 
-prepare_acceleration = 1 # 0: ignore acceleration, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF)
+prepare_acceleration = 2 # 0: ignore acceleration, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF)
 twiss_mode = '4d' # '4d' or '6d
 zeta0 = 17.5 # if double RF, 6d-twiss at zeta0=0 fails because is unstable fixed point; this is a guess of the stable fixed point
 
@@ -72,11 +72,9 @@ on_tune_ramp = 1 # if 1, activates tune ramp
 qx_fin = 4.17 # final horizontal tune
 qy_fin = 4.23 # final vertical tune
 
-install_space_charge = False
+install_space_charge = True
 space_charge_mode = 'frozen' # 'frozen' or 'pic' or 'quasi-frozen'
 num_spacecharge_interactions = 160 # space charge interactions per turn
-tol_spacecharge_position = 1e-2 # minimum/maximum space between sc elements
-#tol_spacecharge_position = None # ?
 
 GPU_FLAG = False # if True, GPU is used
 if GPU_FLAG:
@@ -130,7 +128,6 @@ parameters = {
     'install_space_charge': install_space_charge,
     'space_charge_mode': space_charge_mode,
     'num_spacecharge_interactions': num_spacecharge_interactions,
-    'tol_spacecharge_position': tol_spacecharge_position,
     'GPU_FLAG': GPU_FLAG,
     'context': context,
 }
