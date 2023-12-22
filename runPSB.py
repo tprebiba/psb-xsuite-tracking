@@ -66,7 +66,8 @@ if p['install_space_charge']:
             n_lims_x=7, n_lims_y=5,#3,
             #z_range=(-3*p['sigma_z'], 3*p['sigma_z']), 
             z_range=(-Cpsb/2, Cpsb/2), 
-            _average_transverse_distribution=False)
+            solver=p['pic_solver'],
+            )
     else:
         raise ValueError(f'Invalid mode: {mode}')
     print('Space charge installed')
@@ -156,9 +157,7 @@ for ii in range(num_turns):
             print('Injecting %i macroparticles.'%(int(p['n_part']/p['num_injections'])))
         intensity.append(particles.weight[particles.state>0].sum())
 
-    # if coasting, keep particles within circumference (not very accurate)
-    if p['longitudinal_shape'] == 'coasting':
-        particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2
+    particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2
 
     # track one turn
     #line.track(particles, turn_by_turn_monitor=True)

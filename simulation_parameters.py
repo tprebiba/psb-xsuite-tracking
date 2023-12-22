@@ -6,17 +6,17 @@ import numpy as np
 #######################################
 #num_turns = 100000 # number of turns to track
 num_turns = 100
-turns2saveparticles = [1,2,5,10,20,50, 100,500, 1000, 2000, num_turns-1]
+turns2saveparticles = [1,2,5,10,20,50,100,500, 1000, 2000, num_turns-1]
 
 #######################################
 # 2) Beam parameters
 #######################################
 #n_part = int(5e5) #int(5e5) # number of macroparticles: 2e5 were used in pyorbit
-n_part = int(1e4)
+n_part = int(1e2)
 bunch_intensity = 40.0e10 # number of particles per bunch
 macrosize = bunch_intensity/n_part # number of particles (charges) per macroparticle
 
-particle_distribution = 'simulated'
+particle_distribution = 'simulated' # 'simulated' or 'real
 if particle_distribution == 'simulated':
     nemitt_x = 1.2e-6 # normalized emittance in x
     nemitt_y = 1.0e-6 # normalized emittance in y
@@ -24,11 +24,11 @@ if particle_distribution == 'simulated':
     longitudinal_shape = 'parabolic' # 'parabolic' or 'coasting' or 'gaussian'
     num_injections = 1
 elif particle_distribution == 'real':
-    nemitt_x = np.nan
-    nemitt_y = np.nan
-    sigma_z = np.nan
+    nemitt_x = 0.6e-6 # guess, to be revised
+    nemitt_y = 0.6e-6 # guess, to be revised
+    sigma_z = 10 # guess, to be revised
     longitudinal_shape = np.nan
-    num_injections = 3
+    num_injections = 1
 
 qx_ini = 4.40
 qy_ini = 4.45
@@ -72,9 +72,10 @@ on_tune_ramp = 1 # if 1, activates tune ramp
 qx_fin = 4.17 # final horizontal tune
 qy_fin = 4.23 # final vertical tune
 
-install_space_charge = True
-space_charge_mode = 'frozen' # 'frozen' or 'pic' or 'quasi-frozen'
+install_space_charge = False # if True, space charge is installed
+space_charge_mode = 'pic' # 'frozen' or 'pic' or 'quasi-frozen'
 num_spacecharge_interactions = 160 # space charge interactions per turn
+pic_solver = 'FFTSolver2p5DAveraged' # `FFTSolver2p5DAveraged` or `FFTSolver2p5D`
 
 GPU_FLAG = False # if True, GPU is used
 if GPU_FLAG:
@@ -128,6 +129,7 @@ parameters = {
     'install_space_charge': install_space_charge,
     'space_charge_mode': space_charge_mode,
     'num_spacecharge_interactions': num_spacecharge_interactions,
+    'pic_solver': pic_solver,
     'GPU_FLAG': GPU_FLAG,
     'context': context,
 }

@@ -8,16 +8,14 @@ import matplotlib.pyplot as plt
 png_dir = './'
 source_dir = '../input/'
 files = glob.glob(source_dir+'*.json')
-#print(files)
+print(files)
 
 #%%
 df = {}
-for file in files[0::]:
+for file in files[0:2]:
     #print(file)
     #turn = int(file.split('/')[-1].split('_')[-1][0:5])
     df[file] = pd.read_json(file)
-#file = files[-3]
-
 
 #%%
 for file in files[0::]:
@@ -69,6 +67,7 @@ for file in files[0::]:
     ax.set_xlabel('z [m]')
     ax.set_ylabel('dE [MeV] ')
     ax.set_ylim(-2,2)
+    ax.set_xlim(-50,50)
     for ax in axs.flatten():
             ax.xaxis.label.set_size(fontsize)
             ax.yaxis.label.set_size(fontsize)
