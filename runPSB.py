@@ -7,8 +7,6 @@ import numpy as np
 import json
 import time
 import os
-
-#from statisticalEmittance.statisticalEmittance import statisticalEmittance as stE
 from lib.statisticalEmittance import StatisticalEmittance as stE
 
 #%%

@@ -5,13 +5,15 @@ echo "uname -r:" `uname -r`
 source /usr/local/xsuite/miniforge3/bin/activate xsuite
 pwd
 
-cp -r /afs/cern.ch/work/t/tprebiba/half-integer_xsuite/000_PSB_half-integer_dynamic_crossing_PIC_reference/psb .
-cp -r /afs/cern.ch/work/t/tprebiba/half-integer_xsuite/000_PSB_half-integer_dynamic_crossing_PIC_reference/tables .
-cp -r /afs/cern.ch/work/t/tprebiba/half-integer_xsuite/000_PSB_half-integer_dynamic_crossing_PIC_reference/input .
-cp -r /afs/cern.ch/work/t/tprebiba/half-integer_xsuite/000_PSB_half-integer_dynamic_crossing_PIC_reference/output .
-cp -r /afs/cern.ch/work/t/tprebiba/half-integer_xsuite/000_PSB_half-integer_dynamic_crossing_PIC_reference/lib .
-cp /afs/cern.ch/work/t/tprebiba/half-integer_xsuite/000_PSB_half-integer_dynamic_crossing_PIC_reference/*.py .
-cp /afs/cern.ch/work/t/tprebiba/half-integer_xsuite/000_PSB_half-integer_dynamic_crossing_PIC_reference/*.sh .
+current_directory="/home/tprebiba/eos/Fellowship/03_Xsuite/psb-xsuite-tracking"
+
+cp -r $current_directory/psb .
+cp -r $current_directory/input .
+cp -r $current_directory/output .
+cp -r $current_directory/lib .
+cp -r $current_directory/time_tables .
+cp $current_directory/*.py .
+cp $current_directory/*.sh .
 
 #source $MYPYTHON/bin/activate ""
 #export PATH=$MYPYTHON/bin:$PATH
