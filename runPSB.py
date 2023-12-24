@@ -121,6 +121,38 @@ if p['particle_distribution'] == 'real':
     particles.state[0] = -500 # kill the particle added by default
 
 #%%
+if p['install_injection_foil']==True:
+
+    # I need a to_dict() method for Foil in order to save the line to json
+    # to be implemented...
+    
+    from lib.foil import Foil
+
+    #########################################
+    # Creating PSB foil
+    #########################################
+    print('Creating PSB foil...')
+    thickness = 200 #ug/cm^2
+    xmin = -0.099
+    #xmax = -0.067
+    xmax = +0.099 # for testing
+    ymin = -0.029
+    ymax = 0.029
+    psbfoil = Foil(xmin, xmax, ymin, ymax, thickness)
+    print('PSB foil created.')
+    print('Setting scatter choice to %s (1: simple (no losses) 0: full (with losses))'%(p['scatterchoice']))
+    psbfoil.setScatterChoice(p['scatterchoice'])
+    psbfoil.setActivateFoil(1) # activates foil
+
+    #########################################
+    # Insert foil element to line
+    #########################################
+    print('Inserting foil element to line.')
+    line.discard_tracker()
+    line.insert_element(index='bi1.tstr1l1', element=psbfoil, name='psbfoil')
+    line.build_tracker()
+
+#%%
 #########################################
 # Last configs
 #########################################
@@ -151,6 +183,9 @@ for ii in range(num_turns):
         if ii == p['num_injections']:
             p_injection.num_particles_to_inject = 0
             print('Injection finished.')
+            #line.psbfoil.setActivateFoil(0) # deactivates foil
+            psbfoil.setActivateFoil(0) # deactivates foil
+            print('Foil deactivated.')
         elif ii<p['num_injections']:
             print('Injecting %i macroparticles.'%(int(p['n_part']/p['num_injections'])))
         intensity.append(particles.weight[particles.state>0].sum())

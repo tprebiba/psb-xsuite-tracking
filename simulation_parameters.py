@@ -16,7 +16,7 @@ n_part = int(1e2)
 bunch_intensity = 40.0e10 # number of particles per bunch
 macrosize = bunch_intensity/n_part # number of particles (charges) per macroparticle
 
-particle_distribution = 'simulated' # 'simulated' or 'real
+particle_distribution = 'real' # 'simulated' or 'real
 if particle_distribution == 'simulated':
     nemitt_x = 1.2e-6 # normalized emittance in x
     nemitt_y = 1.0e-6 # normalized emittance in y
@@ -28,7 +28,7 @@ elif particle_distribution == 'real':
     nemitt_y = 0.6e-6 # guess, to be revised
     sigma_z = 10 # guess, to be revised
     longitudinal_shape = np.nan
-    num_injections = 1
+    num_injections = 10
 
 qx_ini = 4.40
 qy_ini = 4.45
@@ -76,6 +76,9 @@ install_space_charge = False # if True, space charge is installed
 space_charge_mode = 'pic' # 'frozen' or 'pic' or 'quasi-frozen'
 num_spacecharge_interactions = 160 # space charge interactions per turn
 pic_solver = 'FFTSolver2p5DAveraged' # `FFTSolver2p5DAveraged` or `FFTSolver2p5D`
+
+install_injection_foil = True # if True, injection foil is installed
+scatterchoice = 1 # 1: simple (no losses) 0: full (with losses)
 
 GPU_FLAG = False # if True, GPU is used
 if GPU_FLAG:
@@ -130,6 +133,8 @@ parameters = {
     'space_charge_mode': space_charge_mode,
     'num_spacecharge_interactions': num_spacecharge_interactions,
     'pic_solver': pic_solver,
+    'install_injection_foil': install_injection_foil,
+    'scatterchoice': scatterchoice,
     'GPU_FLAG': GPU_FLAG,
     'context': context,
 }
