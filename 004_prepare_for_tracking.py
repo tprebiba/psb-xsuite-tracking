@@ -69,17 +69,6 @@ print('Twiss computed and saved to psb/psb_twiss_thin.pkl.')
 print('Working point of thin lattice: (Qx, Qy) = (%s, %s)'%(tw.qx, tw.qy))
 
 #########################################
-# Start lattice at desired location
-#########################################
-element_to_cycle = p['element_to_cycle']
-if element_to_cycle != None:
-    line.discard_tracker() # We need to discard the tracker to edit the line
-    line.cycle(name_first_element = element_to_cycle, inplace=True)
-    print('Changed line starting point to %s.'%(element_to_cycle))
-else:
-    print('Line starting point not changed.')
-
-#########################################
 # Save line to .json
 #########################################
 line.to_json('psb/psb_line_thin.json')

@@ -10,7 +10,19 @@ print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 
 if p['prepare_acceleration']==0:
     print('prepare_acceleration = 0')
-    print('No acceleration included.')
+    print('Switching off all cavities.')
+    line = xt.Line.from_json('psb/psb_line_thick.json')
+    line_table = line.get_table()
+    element_mask = np.where(line_table['element_type']=='Cavity')[0]
+    for i in element_mask:
+        cav_name = line_table['name'][i]
+        line.element_refs[cav_name].voltage = 0
+        line.element_refs[cav_name].frequency = 0
+    print('All cavities switched off.')
+    line.twiss_default['method'] = '4d' # now with cavity
+    print('Twiss method set to 4d.')
+    line.to_json('psb/psb_line_thick.json')
+    print('Line saved to psb/psb_line_thick.json')
 
 elif p['prepare_acceleration']==1:
     print('prepare_acceleration = 1')

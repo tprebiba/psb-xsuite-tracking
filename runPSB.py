@@ -9,6 +9,7 @@ import time
 import os
 from lib.statisticalEmittance import StatisticalEmittance as stE
 
+
 #%%
 #########################################
 # Load parameters
@@ -22,6 +23,7 @@ if p['prepare_tune_ramp']:
     for key in d:
         p[key] = d[key]
 
+
 #%%
 #########################################
 # Load PSB line
@@ -30,6 +32,7 @@ context = p['context']
 line = xt.Line.from_json(source_dir+'psb/psb_line_thin.json')
 Cpsb = line.get_length() # 157.08 m
 print('Loaded PSB line from psb/psb_line_thin.json.')
+
 
 #%%
 #########################################
@@ -72,6 +75,7 @@ if p['install_space_charge']:
 else:
      print('Skipping space charge...')
 
+
 #%%
 #########################################
 # Build tracker
@@ -81,60 +85,58 @@ print('Tracker built')
 #line_sc_off = line.filter_elements(exclude_types_starting_with='SpaceCh') # to remove space charge
 #print('Keeping line_sc_off: line without space charge knobs.')
 
-#%%
-#########################################
-# Get particles from input
-#########################################
-if p['particle_distribution'] == 'simulated':
-    print('Simulated particle distribution.')
-    with open(source_dir+'input/particles_initial.json', 'r') as fid:
-        particles = xp.Particles.from_dict(json.load(fid), _context=context)
-    print('Loaded particles from input/particles_initial.json.')
-elif p['particle_distribution'] == 'real':
-    print('Real particle distribution.')
-    with open('input/part_for_injection.json', 'r') as fid:
-        part_for_injection = xp.Particles.from_dict(json.load(fid), _context=context)
-    print('Loaded particles from input/part_for_injection.json.')
 
 #%%
-if p['particle_distribution'] == 'real':
-    #########################################
+#########################################
+# Setup particles for injection
+#########################################
+print('%s particle distribution.'%p['particle_distribution'])
+with open(source_dir+'input/particles_initial.json', 'r') as fid:
+    particles_for_injection = xp.Particles.from_dict(json.load(fid), _context=context)
+print('Loaded particles from input/particles_initial.json.')
+if p['num_injections']==1:
+    print('Number of injections = 1.')
+    if p['particle_distribution'] == 'simulated':
+        particles = particles_for_injection
+    elif p['particle_distribution'] == 'real':
+        # to be reviewed; current implementation is not correct
+        # 'real' particles_for_injection is of length 60000, different from p['n_part']
+        particles = particles_for_injection
+elif p['num_injections']>1:
+    print('Number of injections = %i.'%p['num_injections'])
+    
     # Build and insert multi-turn injection element 
-    #########################################
-    if 'injection' not in line.element_names:
-        print('Building and inserting multi-turn injection element to PSB lattice.')
-        print('Number of injections: ', p['num_injections'])
-        print('Number of macroparticles per injection: ', int(p['n_part']/p['num_injections']))
-        p_injection = xt.ParticlesInjectionSample(particles_to_inject=part_for_injection,
-                                                  line=line,
-                                                  element_name='injection',
-                                                  num_particles_to_inject=int(p['n_part']/p['num_injections']))
-        line.discard_tracker()
-        line.insert_element(index='bi1.tstr1l1', element=p_injection, name='injection')
-        line.build_tracker()
+    print('Building and inserting multi-turn injection element to PSB lattice.')
+    print('Number of injections: ', p['num_injections'])
+    print('Number of macroparticles per injection: ', int(p['n_part']/p['num_injections']))
+    p_injection = xt.ParticlesInjectionSample(particles_to_inject=particles_for_injection,
+                                              line=line,
+                                              element_name='injection',
+                                              num_particles_to_inject=int(p['n_part']/p['num_injections']))
+    line.discard_tracker()
+    line.insert_element(index='bi1.tstr1l1', element=p_injection, name='injection')
+    line.build_tracker()
 
-    #########################################
     # Generate particle object with unallocated space
-    #########################################
     print('Generating particle object with unallocated space.')
     particles = line.build_particles(_capacity=p['n_part']+1, x=0)
     particles.state[0] = -500 # kill the particle added by default
+    
 
 #%%
-if p['install_injection_foil']==True:
-
-    # I need a to_dict() method for Foil in order to save the line to json
-    # to be implemented...
-    
+#########################################
+# Include injection foil
+# I need a to_dict() method for Foil in 
+# order to save the line to json
+# to be implemented...
+#########################################
+if p['install_injection_foil']==True:    
     from lib.foil import Foil
 
-    #########################################
-    # Creating PSB foil
-    #########################################
     print('Creating PSB foil...')
     thickness = 200 #ug/cm^2
     xmin = -0.099
-    #xmax = -0.067
+    #xmax = -0.067 # actual location of the foil
     xmax = +0.099 # for testing
     ymin = -0.029
     ymax = 0.029
@@ -144,13 +146,23 @@ if p['install_injection_foil']==True:
     psbfoil.setScatterChoice(p['scatterchoice'])
     psbfoil.setActivateFoil(1) # activates foil
 
-    #########################################
-    # Insert foil element to line
-    #########################################
     print('Inserting foil element to line.')
     line.discard_tracker()
     line.insert_element(index='bi1.tstr1l1', element=psbfoil, name='psbfoil')
     line.build_tracker()
+
+
+#########################################
+# Start lattice at desired location
+#########################################
+element_to_cycle = p['element_to_cycle']
+if element_to_cycle != None:
+    line.discard_tracker() # We need to discard the tracker to edit the line
+    line.cycle(name_first_element = element_to_cycle, inplace=True)
+    print('Changed line starting point to %s.'%(element_to_cycle))
+    line.build_tracker()
+else:
+    print('Line starting point not changed.')
 
 #%%
 #########################################
@@ -168,6 +180,7 @@ else:
 output=[]
 intensity = []
 
+
 #%%
 #########################################
 # Start tracking
@@ -178,18 +191,20 @@ start = time.time()
 for ii in range(num_turns):
     print(f'Turn {ii} out of {num_turns}')
 
-    # multi-turn injection
-    if p['particle_distribution'] == 'real':
+    # multi-turn injection + foil
+    if p['num_injections']>1:
         if ii == p['num_injections']:
             p_injection.num_particles_to_inject = 0
             print('Injection finished.')
-            #line.psbfoil.setActivateFoil(0) # deactivates foil
-            psbfoil.setActivateFoil(0) # deactivates foil
-            print('Foil deactivated.')
+            if p['install_injection_foil']==True:
+                #line.psbfoil.setActivateFoil(0) # deactivates foil
+                psbfoil.setActivateFoil(0)
+                print('Foil deactivated.')
         elif ii<p['num_injections']:
             print('Injecting %i macroparticles.'%(int(p['n_part']/p['num_injections'])))
         intensity.append(particles.weight[particles.state>0].sum())
 
+    # keep particles within the ring circumference
     particles.zeta = (particles.zeta+Cpsb/2)%Cpsb-Cpsb/2
 
     # track one turn
@@ -218,5 +233,4 @@ print('Total seconds = ', end - start)
 np.save(source_dir+'output/emittances', output)
 print(f'Emittances saved to output/emittances.npy.')
 #print('Final x and y emittances: ', bunch_moments['nemitt_x'].tolist()[-1], bunch_moments['nemitt_y'].tolist()[-1])
-
 # %%
