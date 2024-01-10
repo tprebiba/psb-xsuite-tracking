@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "uname -r:" `uname -r`
 
-source /usr/local/xsuite/miniforge3/bin/activate xsuite
+#source /usr/local/xsuite/miniforge3/bin/activate xsuite
 pwd
 
 current_directory=/home/tprebiba/eos/Fellowship/03_Xsuite/psb-xsuite-tracking
