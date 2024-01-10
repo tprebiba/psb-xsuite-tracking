@@ -43,7 +43,7 @@ echo "Configuring paths on htcondor_executable for submission to htcondor"
 current_directory=$(pwd)
 htcondor_executable_file="htcondor_executable.sh"
 if [ -e "$htcondor_executable_file" ]; then
-    sed -i "8s|.*|current_directory=\"$current_directory\"|" "$htcondor_executable_file"
+    sed -i "8s|.*|current_directory=$current_directory|" "$htcondor_executable_file"
     echo "Current directory $current_directory written to $htcondor_executable_file."
 else
     echo "Error: $htcondor_executable_file does not exist."
