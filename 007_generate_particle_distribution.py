@@ -29,7 +29,7 @@ Cpsb = line.get_length() # 157.08 m
 if p['particle_distribution'] == 'simulated':
     print('Simulated particle distribution.')
     print('Generating particles...')
-    context = p['context']
+    context = xo.ContextCpu()
     if p['longitudinal_shape'] == 'gaussian':
         particles = xp.generate_matched_gaussian_bunch(_context=context, num_particles=p['n_part'],
                                 total_intensity_particles=p['bunch_intensity'],
