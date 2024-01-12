@@ -43,7 +43,7 @@ if p['install_space_charge']:
     print(f'Installing space charge in {mode} mode')
     # install nodes in lattice frozen-like (exact parameters do not matter if pic is used)
     lprofile = xf.LongitudinalProfileQGaussian(number_of_particles=p['bunch_intensity'], 
-                                            sigma_z=p['sigma_z']*10/2, 
+                                            sigma_z=p['sigma_z'], 
                                             z0=0, q_parameter=1.)
     xf.install_spacecharge_frozen(line=line,
                     particle_ref=line.particle_ref,
