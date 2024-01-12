@@ -49,7 +49,8 @@ if p['install_space_charge']:
                     particle_ref=line.particle_ref,
                     longitudinal_profile=lprofile,
                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'],
-                    sigma_z=p['sigma_z'],
+                    #sigma_z=p['sigma_z'],
+                    delta_rms=1e-3,
                     num_spacecharge_interactions=p['num_spacecharge_interactions'])
     if mode == 'frozen':
         pass # Already configured in line
@@ -168,6 +169,18 @@ else:
 #########################################
 # Last configs
 #########################################
+if p['prepare_acceleration'] == 0:
+    # Switching all RF cavities OFF
+    print('Switching off all cavities.')
+    line_table = line.get_table()
+    element_mask = np.where(line_table['element_type']=='Cavity')[0]
+    for i in element_mask:
+        cav_name = line_table['name'][i]
+        line.element_refs[cav_name].voltage = 0
+        line.element_refs[cav_name].frequency = 0
+    print('All cavities switched off.')
+    line.twiss_default['method'] = '4d'
+    print('Twiss method set to 4d.')
 line.enable_time_dependent_vars = True
 #line.dt_update_time_dependent_vars = 3e-6 # approximately every 3 turns
 line.vars.cache_active = False

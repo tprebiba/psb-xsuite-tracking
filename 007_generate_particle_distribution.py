@@ -48,7 +48,9 @@ if p['particle_distribution'] == 'simulated':
                                     )
         print('Parabolic longitudinal distribution.')
     elif p['longitudinal_shape'] == 'coasting':
-        # to be improved...
+        # To be improved...
+        
+        # Generate particles
         particles = parabolic_longitudinal_distribution(_context=context, num_particles=p['n_part'],
                                     total_intensity_particles=p['bunch_intensity'],
                                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'], sigma_z=p['sigma_z'],
@@ -56,12 +58,12 @@ if p['particle_distribution'] == 'simulated':
                                     line=line,
                                     #line=line_sc_off
                                     )
+        
         # "Force" coasting beam
         particles.zeta = np.random.uniform(-Cpsb/2, Cpsb/2, p['n_part'])
-        print("'Forcing' coasting beam using numpy.")
-        print('Coasting beam.')
-    #particles.delta = np.random.uniform(-1.36e-3, 1.36e-3, n_part) # not parabolic
-    #with open('input/particles_initial.json', 'w') as fid:
+        #particles.delta = np.random.uniform(-1.36e-3, 1.36e-3, n_part) # not parabolic
+        print("'Forcing' coasting beam using numpy (uniform zeta).")
+    
     with open('input/particles_initial.json', 'w') as fid:
         json.dump(particles.to_dict(), fid, cls=xo.JEncoder)
     print('Number of macroparticles: ', p['n_part'])
