@@ -6,8 +6,6 @@ from lib.parabolic_longitudinal_distribution import parabolic_longitudinal_distr
 import numpy as np
 import json
 import pandas as pd
-if p['GPU_FLAG']:
-    import cupy as cp
 
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 print('007_generate_particle_distribution.py')
@@ -59,12 +57,8 @@ if p['particle_distribution'] == 'simulated':
                                     #line=line_sc_off
                                     )
         # "Force" coasting beam
-        if p['GPU_FLAG']:
-            particles.zeta = cp.random.uniform(-Cpsb/2, Cpsb/2, p['n_part'])
-            print("'Forcing' coasting beam using cupy.")
-        else:
-            particles.zeta = np.random.uniform(-Cpsb/2, Cpsb/2, p['n_part'])
-            print("'Forcing' coasting beam using numpy.")
+        particles.zeta = np.random.uniform(-Cpsb/2, Cpsb/2, p['n_part'])
+        print("'Forcing' coasting beam using numpy.")
         print('Coasting beam.')
     #particles.delta = np.random.uniform(-1.36e-3, 1.36e-3, n_part) # not parabolic
     #with open('input/particles_initial.json', 'w') as fid:
