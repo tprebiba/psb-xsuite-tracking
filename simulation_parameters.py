@@ -7,6 +7,7 @@ import numpy as np
 #num_turns = 100000 # number of turns to track
 num_turns = 500
 turns2saveparticles = [1,2,5,10,20,50,100,200, 300, 500, 1000, 2000, num_turns-1]
+turns2plot = np.arange(1,20,1)
 
 #######################################
 # 2) Beam parameters
@@ -21,7 +22,7 @@ if particle_distribution == 'simulated':
     nemitt_x = 1.0e-6 # normalized emittance in x
     nemitt_y = 1.0e-6 # normalized emittance in y
     sigma_z = (400/4)*0.525*0.3 # bunch length in m
-    longitudinal_shape = 'parabolic' # 'parabolic' or 'coasting' or 'gaussian'
+    longitudinal_shape = 'gaussian' # 'parabolic' or 'coasting' or 'gaussian'
 elif particle_distribution == 'real':
     nemitt_x = 0.4e-6 # guess, to be revised
     nemitt_y = 0.3e-6 # guess, to be revised
@@ -57,14 +58,14 @@ include_injection_chicane_correction = 0 # if 1, 002B_include_injection_chicane_
 on_chicane_tune_corr = 1 # if 1, activates tune correction of injection chicane
 on_chicane_beta_corr = 1 # if 1, activates beta correction of injection chicane
 
-prepare_acceleration = 2 # 0: all RF OFF, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF at 8kV)
+prepare_acceleration = 1 # 0: all RF OFF, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF at 8kV)
 twiss_mode = '4d' # '4d' or '6d
 zeta0 = 17.5 # if double RF, 6d-twiss at zeta0=0 fails because is unstable fixed point; this is a guess of the stable fixed point
 
 slices = 3 # number of slices in thin lattice
 # to have the starting point of the lattice at a different location, None otherwise
-element_to_cycle = None # line starts at the start of the 1st sector (NOT at the stripping foil)
-#element_to_cycle = 'bi1.tstr1l1' # stripping foil
+#element_to_cycle = None # line starts at the start of the 1st sector (NOT at the stripping foil)
+element_to_cycle = 'bi1.tstr1l1' # stripping foil
 #element_to_cycle = 'br1.bwsv11l1' # vertical LIU wire scanner
 
 prepare_tune_ramp = 0 # if 1, 004_prepare_tune_ramp.py is executed
@@ -72,7 +73,7 @@ on_tune_ramp = 1 # if 1, activates tune ramp
 qx_fin = 4.17 # final horizontal tune
 qy_fin = 4.23 # final vertical tune
 
-install_space_charge = True # if True, space charge is installed
+install_space_charge = False # if True, space charge is installed
 space_charge_mode = 'frozen' # 'frozen' or 'pic' or 'quasi-frozen'
 num_spacecharge_interactions = 160 # space charge interactions per turn
 pic_solver = 'FFTSolver2p5DAveraged' # `FFTSolver2p5DAveraged` or `FFTSolver2p5D`
@@ -93,6 +94,7 @@ parameters = {
     # Tracking parameters
     'num_turns': num_turns,
     'turns2saveparticles': turns2saveparticles,
+    'turns2plot': turns2plot,
 
     # Beam parameters
     'n_part': n_part,
