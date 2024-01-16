@@ -99,8 +99,7 @@ elif p['particle_distribution'] == 'real':
 
     # Following analysis from PyOrbit
     # TO BE REVIEWED
-    choppingFactor = 0.7
-    z_lim = choppingFactor*2*np.pi*25
+    z_lim = p['choppingFactor']*2*np.pi*25
     z_offset = -0.8 # for ramp #0.0
     z_min, z_max,  = -z_lim/2.+z_offset, z_lim/2.+z_offset 
     speed_of_light = 299792458 # m/s

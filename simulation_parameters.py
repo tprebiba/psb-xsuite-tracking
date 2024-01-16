@@ -107,6 +107,8 @@ parameters = {
     'nemitt_y': nemitt_y,
     'sigma_z': sigma_z,
     'longitudinal_shape': longitudinal_shape,
+    'choppingFactor': choppingFactor,
+    'Linac4_current': Linac4_current,
     'num_injections': num_injections,
     'qx_ini': qx_ini,
     'qy_ini': qy_ini,
