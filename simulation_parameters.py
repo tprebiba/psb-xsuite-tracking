@@ -4,8 +4,7 @@ import numpy as np
 #######################################
 # 1) Tracking parameters
 #######################################
-#num_turns = 100000 # number of turns to track
-num_turns = 500
+num_turns = 500 # number of turns to track
 turns2saveparticles = [1,2,5,10,20,50,100,200, 300, 500, 1000, 2000, num_turns-1]
 turns2plot = np.arange(1,20,1)
 
@@ -29,6 +28,9 @@ elif particle_distribution == 'real':
     sigma_z = 10 # guess, to be revised
     longitudinal_shape = np.nan # not used
 
+choppingFactor = 0.7
+Linac4_current = 25e-3 # Amps
+num_injections = int(np.ceil(bunch_intensity/choppingFactor/Linac4_current/6.25e12))
 num_injections = 1 # if > 1: a multi-turn injection is setup
 
 qx_ini = 4.40
