@@ -6,7 +6,7 @@ def plot_phasespace(particles, turn, png_dir,
                     bins=500, vmin=0.1,
                     xy_extent_mm=22, pxpy_extent_mrad=7, z_extent_m=157.08/2, dE_extent_MeV=2,
                     fontsize=10,
-                    ):
+                    GPU_FLAG=False, mask_lost_particles=True):
 
     x = particles.x
     y = particles.y
@@ -14,7 +14,26 @@ def plot_phasespace(particles, turn, png_dir,
     yp = particles.py
     z = particles.zeta
     dE = particles.ptau*particles.p0c/1e6
+    state = particles.state
     print('number of particles in turn ', turn, 'is ', len(x))
+
+    if GPU_FLAG:
+        x = x.get()
+        y = y.get()
+        xp = xp.get()
+        yp = yp.get()
+        z = z.get()
+        dE = dE.get()
+        state = state.get()
+    
+    if mask_lost_particles:
+        mask = particles.state > 0
+        x = x[mask]
+        y = y[mask]
+        xp = xp[mask]
+        yp = yp[mask]
+        z = z[mask]
+        dE = dE[mask]
 
     my_cmap = plt.cm.jet
     my_cmap.set_under('w',0.1)
