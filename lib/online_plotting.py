@@ -79,5 +79,5 @@ def plot_phasespace(particles, turn, png_dir,
         ax.tick_params(labelsize=fontsize)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     #plt.show()
-    plt.savefig('%sphasespace_%s.png'%(png_dir, turn), dpi=100)
+    plt.savefig('%sphasespace_%s.png'%(png_dir, str(turn).zfill(6)), dpi=100)
     plt.close()
