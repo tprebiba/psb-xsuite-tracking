@@ -2,12 +2,14 @@
 import xtrack as xt
 import xobjects as xo
 import xfields as xf
+#import lib.xfields.xfields as xf
 import xpart as xp
 import numpy as np
 import json
 import time
 import os
 from lib.statisticalEmittance import StatisticalEmittance as stE
+from lib.online_plotting import plot_phasespace
 
 
 #%%
@@ -49,8 +51,8 @@ if p['install_space_charge']:
                     particle_ref=line.particle_ref,
                     longitudinal_profile=lprofile,
                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'],
-                    #sigma_z=p['sigma_z'],
-                    delta_rms=1e-3,
+                    sigma_z=p['sigma_z'],
+                    #delta_rms=1e-3,
                     num_spacecharge_interactions=p['num_spacecharge_interactions'])
     if mode == 'frozen':
         pass # Already configured in line
@@ -226,7 +228,10 @@ for ii in range(num_turns):
 
     # update output
     bunch_moments=r.measure_bunch_moments(particles)
-    output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist()])
+    if p['GPU_FLAG']:
+        output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist(), np.mean((particles.x).get()), np.mean((particles.y).get()), np.mean((particles.zeta).get()), np.mean((particles.delta).get())])
+    else:
+        output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist(), np.mean(particles.x), np.mean(particles.y), np.mean(particles.zeta), np.mean(particles.deltas)])
 
     # save every some turns
     if ii in p['turns2saveparticles']:
@@ -239,6 +244,11 @@ for ii in range(num_turns):
         ouput=np.array(output)
         np.save(source_dir+'output/emittances', output)
         print(f'Emittances saved to output/emittances.npy.')
+    
+    # plot every some turns
+    if ii in p['turns2plot']:
+        plot_phasespace(particles, ii, png_dir=source_dir+'output/', bins=600, vmin=2, GPU_FLAG=p['GPU_FLAG'])
+        print(f'Phase space plot saved to output/turn_{ii:05d}.png.')
 
 end = time.time()
 print('Tracking finished.')
