@@ -52,7 +52,6 @@ if p['install_space_charge']:
                     longitudinal_profile=lprofile,
                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'],
                     sigma_z=p['sigma_z'],
-                    #delta_rms=1e-3,
                     num_spacecharge_interactions=p['num_spacecharge_interactions'])
     if mode == 'frozen':
         pass # Already configured in line
@@ -231,7 +230,7 @@ for ii in range(num_turns):
     if p['GPU_FLAG']:
         output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist(), np.mean((particles.x).get()), np.mean((particles.y).get()), np.mean((particles.zeta).get()), np.mean((particles.delta).get())])
     else:
-        output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist(), np.mean(particles.x), np.mean(particles.y), np.mean(particles.zeta), np.mean(particles.deltas)])
+        output.append([len(r.coordinate_matrix[0]),bunch_moments['nemitt_x'].tolist(),bunch_moments['nemitt_y'].tolist(),bunch_moments['emitt_z'].tolist(), np.mean(particles.x), np.mean(particles.y), np.mean(particles.zeta), np.mean(particles.delta)])
 
     # save every some turns
     if ii in p['turns2saveparticles']:
