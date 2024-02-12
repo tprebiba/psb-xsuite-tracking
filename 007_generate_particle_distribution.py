@@ -22,6 +22,11 @@ line.cycle(name_first_element = 'bi1.tstr1l1', inplace=True)
 print('Changed line starting point to bi1.tstr1l1 (foil).')
 line.build_tracker()
 Cpsb = line.get_length() # 157.08 m
+print('Twissing.')
+tw = line.twiss()
+co_x_at_foil = tw['x', 'bi1.tstr1l1_entry']
+co_y_at_foil = tw['y', 'bi1.tstr1l1_entry']
+print('Closed orbit at foil: x = %s m, y = %s m.'%(co_x_at_foil, co_y_at_foil))
 
 #########################################
 # Generate particle distribution
@@ -96,6 +101,10 @@ elif p['particle_distribution'] == 'real':
     particles = xt.Particles(q0=1, mass0=xt.PROTON_MASS_EV, p0c=line.particle_ref.p0c[0],ptau=ptau)
     particles.x = df.x.values * 1e-3
     particles.y = df.y.values * 1e-3
+    # assuming that we inject on the closed orbit
+    # steering errors to be included in the future...
+    particles.x += co_x_at_foil
+    particles.y += co_y_at_foil
 
     # Following analysis from PyOrbit
     # TO BE REVIEWED
