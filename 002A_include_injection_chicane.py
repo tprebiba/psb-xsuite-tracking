@@ -51,8 +51,8 @@ elif p['include_injection_chicane']==1:
     #df.head()
     line.functions['fun_bsw_k0l'] = xd.FunctionPieceWiseLinear(x=df['time'].values, y=df['bsw_k0l'].values)
     line.functions['fun_bsw_k2l'] = xd.FunctionPieceWiseLinear(x=df['time'].values, y=df['bsw_k2l'].values)
-    line.vars['on_chicane_k0'] = 1 # to easily switch off the effect of the edge focusing
-    line.vars['on_chicane_k2'] = 1 # to easily switch off the effect of the eddy currents
+    line.vars['on_chicane_k0'] = p['on_chicane_k0'] # to easily switch off the effect of the edge focusing
+    line.vars['on_chicane_k2'] = p['on_chicane_k2'] # to easily switch off the effect of the eddy currents
     line.vars['bsw_k0l'] = line.functions.fun_bsw_k0l(line.vars['t_turn_s']) * line.vars['on_chicane_k0']
     line.vars['bsw_k2l'] = line.functions.fun_bsw_k2l(line.vars['t_turn_s']) * line.vars['on_chicane_k2'] 
     print('Variables "on_chicane_k0" and "on_chicane_k2" added to switch off edge focusing and eddy currents.')

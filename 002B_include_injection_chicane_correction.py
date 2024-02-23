@@ -35,8 +35,8 @@ elif p['include_injection_chicane_correction']==1:
     line.vars['on_chicane_k0'] = 0
     line.vars['on_chicane_k2'] = 0
     tw0 = line.twiss()
-    line.vars['on_chicane_k0'] = 1
-    line.vars['on_chicane_k2'] = 1
+    line.vars['on_chicane_k0'] = p['on_chicane_k0']
+    line.vars['on_chicane_k2'] = p['on_chicane_k2']
 
 
     #########################################
@@ -98,13 +98,13 @@ elif p['include_injection_chicane_correction']==1:
     #########################################
     # Use functions to control quad strengths
     #########################################
-    line.vars['on_chicane_tune_corr'] = 1
+    line.vars['on_chicane_tune_corr'] = p['on_chicane_tune_corr']
     line.vars['kbrqfcorr'] = (line.vars['on_chicane_tune_corr']
                                 * line.functions.fun_kqf_corr(line.vars['t_turn_s']))
     line.vars['kbrqdcorr'] = (line.vars['on_chicane_tune_corr']
                                 * line.functions.fun_kqd_corr(line.vars['t_turn_s']))
 
-    line.vars['on_chicane_beta_corr'] = 1
+    line.vars['on_chicane_beta_corr'] = p['on_chicane_beta_corr']
     line.vars['kbrqd3corr'] = (line.vars['on_chicane_beta_corr']
                             * line.functions.fun_qd3_corr(line.vars['t_turn_s']))
     line.vars['kbrqd14corr'] = (line.vars['on_chicane_beta_corr']
