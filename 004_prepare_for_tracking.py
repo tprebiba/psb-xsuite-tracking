@@ -14,12 +14,15 @@ line = xt.Line.from_json('psb/psb_line_thick.json') # to get the lengths of the 
 
 #########################################
 # Deactivate chicane and correction
+# Deactivate painting bump
 #########################################
 line.vars['on_chicane_k0'] = 0
 line.vars['on_chicane_k2'] = 0
 line.vars['on_chicane_tune_corr'] = 0
 line.vars['on_chicane_beta_corr'] = 0
+line.vars['on_painting_bump'] = 0
 print('Chicane and correction deactivated.')
+print('Painting bump deactivated.')
 
 #########################################
 # Slice thick line with xsuite 
@@ -57,12 +60,17 @@ print('Working point of thin lattice: (Qx, Qy) = (%s, %s)'%(tw.qx, tw.qy))
 
 #########################################
 # Reactivate chicane and correction
+# Reactivate painting bump
 #########################################
 line.vars['on_chicane_k0'] = p['on_chicane_k0']
 line.vars['on_chicane_k2'] = p['on_chicane_k2']
 line.vars['on_chicane_tune_corr'] = p['on_chicane_tune_corr']
 line.vars['on_chicane_beta_corr'] = p['on_chicane_beta_corr']
-print('Chicane and correction reactivated.')
+line.vars['on_painting_bump'] = p['on_painting_bump']
+if ((p['include_injection_chicane']>0) or (p['include_injection_chicane_correction']>0)):
+    print('Chicane and correction reactivated.')
+if p['prepare_painting']>0:
+    print('Painting bump reactivated.')
 tw = line.twiss()
 tw.to_pandas().to_pickle('psb/psb_twiss_thin.pkl')
 print('Twiss computed and saved to psb/psb_twiss_thin.pkl.')

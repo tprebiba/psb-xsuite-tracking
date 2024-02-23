@@ -1,0 +1,9 @@
+@ NAME             %03s "KSW"
+@ TYPE             %04s "USER"
+@ TITLE            %03s "PSB"
+@ ORIGIN           %22s "MAD-X 5.02.00 Linux 64"
+@ DATE             %08s "24/12/23"
+@ TIME             %08s "08.59.23"
+*             X_BUMP          KBIKSW1L4          KBIKSW2L1         KBIKSW16L1         KBIKSW16L4 
+$                %le                %le                %le                %le                %le 
+  -3.5000000000e-02   5.1720959073e-03   1.3941261670e-02   1.6031186470e-02   3.7937180185e-03

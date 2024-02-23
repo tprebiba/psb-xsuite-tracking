@@ -23,6 +23,9 @@ python 002A_include_injection_chicane.py
 # Configure injection chicane correction functions
 python 002B_include_injection_chicane_correction.py
 
+# Configure transverse painting
+python 002C_prepare_painting.py
+
 # prepare acceleration
 python 003_prepare_acceleration.py
 
