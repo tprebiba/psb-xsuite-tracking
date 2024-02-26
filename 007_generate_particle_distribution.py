@@ -17,22 +17,26 @@ print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 #########################################
 print('Loading PSB line from psb/psb_line_thin.json.')
 line = xt.Line.from_json('psb/psb_line_thin.json')
-# Multi-turn injection is performed at the foil; mismatched otherwise
-line.cycle(name_first_element = 'bi1.tstr1l1', inplace=True)
-print('Changed line starting point to bi1.tstr1l1 (foil).')
 line.build_tracker()
 Cpsb = line.get_length() # 157.08 m
-print('Twissing.')
-tw = line.twiss()
-co_x_at_foil = tw['x', 'bi1.tstr1l1_entry']
-co_y_at_foil = tw['y', 'bi1.tstr1l1_entry']
-print('Closed orbit at foil: x = %s m, y = %s m.'%(co_x_at_foil, co_y_at_foil))
+
 
 #########################################
 # Generate particle distribution
 #########################################
 if p['particle_distribution'] == 'simulated':
     print('Simulated particle distribution.')
+
+    element_to_cycle = p['element_to_cycle']
+    if element_to_cycle != None:
+        print('Element to cycle: %s.'%element_to_cycle)
+        print('Changing starting point of line to generate (simulated) matched distribution with correct optics.')
+        line.discard_tracker() # We need to discard the tracker to edit the line
+        line.cycle(name_first_element = p['element_to_cycle'], inplace=True)
+        line.build_tracker()
+        line.to_json('psb/psb_line_thin.json')
+        print('Line saved to psb/psb_line_thin.json')
+
     print('Generating particles...')
     context = xo.ContextCpu()
     if p['longitudinal_shape'] == 'gaussian':
@@ -77,6 +81,22 @@ if p['particle_distribution'] == 'simulated':
 
 elif p['particle_distribution'] == 'real':
     print('Real particle distribution.')
+    
+    print('Twissing.')
+    tw = line.twiss()
+    #tw = line.twiss(co_search_at='psb1$start') # closed orbit at PSB start, otherwise need to give co_guess (xtrack 0.52.0)
+    co_x_at_foil = tw['x', 'bi1.tstr1l1_entry']
+    co_y_at_foil = tw['y', 'bi1.tstr1l1_entry']
+    print('Closed orbit at foil: x = %s m, y = %s m.'%(co_x_at_foil, co_y_at_foil))
+
+    # Multi-turn injection is performed at the foil; mismatched otherwise
+    line.discard_tracker() # We need to discard the tracker to edit the line
+    line.cycle(name_first_element = 'bi1.tstr1l1', inplace=True)
+    line.build_tracker()
+    print('Changed line starting point to bi1.tstr1l1 (foil).')
+    line.to_json('psb/psb_line_thin.json')
+    print('Line saved to psb/psb_line_thin.json')
+    
     fname = 'L4_particle_distribution/atPSBfoil-450keV.txt'
     #fname = 'L4_particle_distribution/450keV.txt'
     print('Reading %s.'%fname)

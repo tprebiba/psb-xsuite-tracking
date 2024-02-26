@@ -18,7 +18,6 @@ from lib.online_plotting import plot_phasespace
 #########################################
 from simulation_parameters import parameters as p
 source_dir = os.getcwd() + '/'
-#source_dir = '/afs/cern.ch/user/t/tprebiba/workspace/000_PSB_half-integer_dynamic_crossing_PIC_reference/'
 if p['prepare_tune_ramp']:
     with open(source_dir+'time_tables/tunes.json', 'r') as fid:
         d = json.load(fid)
@@ -52,7 +51,9 @@ if p['install_space_charge']:
                     longitudinal_profile=lprofile,
                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'],
                     sigma_z=p['sigma_z'],
-                    num_spacecharge_interactions=p['num_spacecharge_interactions'])
+                    num_spacecharge_interactions=p['num_spacecharge_interactions'],
+                    delta_rms=1e-3
+                    )
     if mode == 'frozen':
         pass # Already configured in line
     # switch to pic or quasi-frozen
@@ -116,7 +117,12 @@ elif p['num_injections']>1:
                                               element_name='injection',
                                               num_particles_to_inject=int(p['n_part']/p['num_injections']))
     line.discard_tracker()
-    line.insert_element(index='bi1.tstr1l1', element=p_injection, name='injection')
+    if p['particle_distribution']=='real':
+        line.insert_element(index='bi1.tstr1l1', element=p_injection, name='injection')
+    elif ((p['particle_distribution']=='simulated') and (p['element_to_cycle'] is not None)):
+        line.insert_element(index=p['element_to_cycle'], element=p_injection, name='injection')
+    else:
+        line.insert_element(index='psb1$start', element=p_injection, name='injection')
     line.build_tracker()
 
     # Generate particle object with unallocated space
@@ -153,18 +159,6 @@ if p['install_injection_foil']==True:
     line.insert_element(index='bi1.tstr1l1', element=psbfoil, name='psbfoil')
     line.build_tracker()
 
-
-#########################################
-# Start lattice at desired location
-#########################################
-element_to_cycle = p['element_to_cycle']
-if element_to_cycle != None:
-    line.discard_tracker() # We need to discard the tracker to edit the line
-    line.cycle(name_first_element = element_to_cycle, inplace=True)
-    print('Changed line starting point to %s.'%(element_to_cycle))
-    line.build_tracker()
-else:
-    print('Line starting point not changed.')
 
 #%%
 #########################################
@@ -211,8 +205,7 @@ for ii in range(num_turns):
             p_injection.num_particles_to_inject = 0
             print('Injection finished.')
             if p['install_injection_foil']==True:
-                #line.psbfoil.setActivateFoil(0) # deactivates foil
-                psbfoil.setActivateFoil(0)
+                psbfoil.setActivateFoil(0) # deactivates foil
                 print('Foil deactivated.')
         elif ii<p['num_injections']:
             print('Injecting %i macroparticles.'%(int(p['n_part']/p['num_injections'])))
@@ -238,8 +231,8 @@ for ii in range(num_turns):
         with open(source_dir+f'output/particles_turn_{ii:05d}.json', 'w') as fid:
             json.dump(particles.to_dict(), fid, cls=xo.JEncoder)
             print(f'Particles saved to output/particles_turn_{ii:05d}.json.')
-        np.save(source_dir+'output/distribution_'+str(int(ii)), r.coordinate_matrix)
-        print(f'Distribution saved to output/distribution_{ii}.npy.')
+        #np.save(source_dir+'output/distribution_'+str(int(ii)), r.coordinate_matrix)
+        #print(f'Distribution saved to output/distribution_{ii}.npy.')
         ouput=np.array(output)
         np.save(source_dir+'output/emittances', output)
         print(f'Emittances saved to output/emittances.npy.')
@@ -254,5 +247,4 @@ print('Tracking finished.')
 print('Total seconds = ', end - start)
 np.save(source_dir+'output/emittances', output)
 print(f'Emittances saved to output/emittances.npy.')
-#print('Final x and y emittances: ', bunch_moments['nemitt_x'].tolist()[-1], bunch_moments['nemitt_y'].tolist()[-1])
 # %%

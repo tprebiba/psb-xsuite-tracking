@@ -4,24 +4,24 @@ import numpy as np
 p = {} 
 
 # Tracking parameters
-p['num_turns'] = 2000 # number of turns to track
-p['turns2saveparticles'] = [1,2,3,4,5,6,7,8,9,10,20,50,80,100,120,150,180,200, 250, 300, 500, 1000, 2000, p['num_turns']-1] # turns to save particles object
+p['num_turns'] = 500 # number of turns to track
+p['turns2saveparticles'] = [1,2,10,100, p['num_turns']-1] # turns to save particles object
 p['turns2plot'] = [] # turns to plot phase space (while tracking)
 
 # Beam intensity and emittance
 p['n_part'] = int(1e4) # number of macroparticles
 p['bunch_intensity'] = 40.0e10 # number of particles per bunch
 p['macrosize'] = p['bunch_intensity']/p['n_part'] # number of charges per macroparticle
-p['particle_distribution'] = 'real' # 'simulated' or 'real
-if p['particle_distribution'] == 'simulated':
+p['particle_distribution'] = 'simulated' # 'simulated' or 'real
+if p['particle_distribution']=='simulated':
     p['nemitt_x'] = 1e-6 # normalized emittance in x
     p['nemitt_y'] = 1e-6 # normalized emittance in y
     p['sigma_z'] = (400/4)*0.525*0.3 # bunch length in m
     p['longitudinal_shape'] = 'gaussian' # 'parabolic' or 'coasting' or 'gaussian'
-elif p['particle_distribution'] == 'real':
-    p['nemitt_x'] = 0.4e-6 # guess, to be revised
-    p['nemitt_y'] = 0.3e-6 # guess, to be revised
-    p['sigma_z'] = 10 # guess, to be revised
+elif p['particle_distribution']=='real':
+    p['nemitt_x'] = 0.35e-6 # approximate
+    p['nemitt_y'] = 0.28e-6 # approximate
+    p['sigma_z'] = 10 # guess, tos be revised
     p['longitudinal_shape'] = np.nan # not used
 
 # Tunes (at injection), chromaticity, imperfections
@@ -36,7 +36,7 @@ p['field_errors'] = {
 }
 
 # Setup acceleration
-p['prepare_acceleration'] = 2 # 0: all RF OFF, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF at 8kV)
+p['prepare_acceleration'] = 0 # 0: all RF OFF, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF at 8kV)
 p['twiss_mode'] = '4d' # '4d' or '6d, used only if all RF are OFF
 p['zeta0'] = 17.5 # if double RF, 6d-twiss at zeta0=0 fails because is unstable fixed point; this is a guess of the stable fixed point
 
@@ -77,7 +77,8 @@ p['qy_fin'] = 4.23 # final vertical tune
 
 # Setup slicing and line cycling
 p['slices'] = 3 # number of slices in thin lattice
-# to have the starting point of the lattice at a different location, None otherwise
+# To have the starting point of the lattice at a different location, None otherwise
+# Relevant ONLY when using simulated particle distribution, foil otherwise
 p['element_to_cycle'] = None # line starts at the start of the 1st sector (NOT at the stripping foil)
 #p['element_to_cycle'] = 'bi1.tstr1l1' # stripping foil
 #p['element_to_cycle'] = 'br1.bwsv11l1' # vertical LIU wire scanner
