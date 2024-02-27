@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 #%%
 png_dir = './'
 source_dir = '../output/'
+source_dir = '/home/tprebiba/afs/temp/'
 files = glob.glob(source_dir+'*.json')
 
 #%%
@@ -17,7 +18,7 @@ for file in files[0:15]:
     df[file] = pd.read_json(file)
 
 #%%
-for file in files[0:15]:
+for file in files[-2:-1]:
     print(file)
 
     try:
@@ -64,8 +65,8 @@ for file in files[0:15]:
     ax.set_xlim(-22,22)
     ax.set_ylim(-22,22)
     ax = axs[1,1]
-    #ax.hist2d(z, dE,bins=bins, cmap=my_cmap, vmin=vmin)
-    ax.plot(z, dE, '.', c='blue')
+    ax.hist2d(z, dE,bins=bins, cmap=my_cmap, vmin=vmin)
+    #ax.plot(z, dE, '.', c='blue')
     ax.set_xlabel('z [m]')
     ax.set_ylabel('dE [MeV] ')
     #ax.set_ylim(-2,2)

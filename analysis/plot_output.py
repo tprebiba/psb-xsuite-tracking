@@ -7,11 +7,8 @@ from simulation_parameters import parameters as p
 
 
 #%%
-#output = np.load('../output/emittances.npy')
-#output = np.load('/home/tprebiba/eos/2637644/output/emittances.npy')
-output = np.load('/home/tprebiba/eos/2009944/output/emittances.npy')
-#output = np.load('/afs/cern.ch/user/t/tprebiba/eos/4729166/output/emittances.npy')
-#output = np.load('/afs/cern.ch/user/t/tprebiba/temp/emittances.npy')
+output = np.load('../output/emittances.npy')
+#output = np.load('/home/tprebiba/afs/temp/emittances.npy')
 macrosize = p['bunch_intensity']/p['n_part']
 intensity = output[:,0]*macrosize
 turns = np.arange(len(intensity))
@@ -32,6 +29,7 @@ ax = axs[1]
 ax.tick_params(axis='both', which='major', labelsize=fontsize)
 ax.set_ylabel('Emittance [mm mrad]', fontsize=fontsize)
 ax.set_xlabel('Turn', fontsize=fontsize)
+ax.set_ylim(0.2, 0.38)
 ax.plot(turns, epsx*1e6, color='green', label='x')
 ax.plot(turns, epsy*1e6, color='red', label='y')
 #ax.plot(turns, epsz, color='green', label='z')
