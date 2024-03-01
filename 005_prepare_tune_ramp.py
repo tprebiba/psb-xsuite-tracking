@@ -22,6 +22,19 @@ elif p['prepare_tune_ramp']==1:
 
 
       #########################################
+      # Deactivate chicane and correction
+      # Deactivate painting bump
+      #########################################
+      line.vars['on_chicane_k0'] = 0
+      line.vars['on_chicane_k2'] = 0
+      line.vars['on_chicane_tune_corr'] = 0
+      line.vars['on_chicane_beta_corr'] = 0
+      line.vars['on_painting_bump'] = 0
+      print('Chicane and correction deactivated.')
+      print('Painting bump deactivated.')
+
+
+      #########################################
       # Generate tune ramp
       #########################################
       print('Matching at (Qx, Qy) = (%s, %s)'%(p['qx_fin'], p['qy_fin']))
@@ -73,6 +86,23 @@ elif p['prepare_tune_ramp']==1:
             json.dump(d, fid, indent=2)
       print('Dictionary: ', d)
       print('Wrote time_tables/tunes.json')
+
+
+      #########################################
+      # Reactivate chicane and correction
+      # Reactivate painting bump
+      #########################################
+      line.vars['on_chicane_k0'] = p['on_chicane_k0']
+      line.vars['on_chicane_k2'] = p['on_chicane_k2']
+      line.vars['on_chicane_tune_corr'] = p['on_chicane_tune_corr']
+      line.vars['on_chicane_beta_corr'] = p['on_chicane_beta_corr']
+      line.vars['on_painting_bump'] = p['on_painting_bump']
+      if ((p['include_injection_chicane']>0) or (p['include_injection_chicane_correction']>0)):
+            print('Chicane and correction reactivated.')
+      if p['prepare_painting']>0:
+            print('Painting bump reactivated.')
+      tw = line.twiss()
+      print('Working point of thin lattice: (Qx, Qy) = (%s, %s)'%(tw.qx, tw.qy))
 
 
       #########################################
