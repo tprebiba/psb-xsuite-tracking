@@ -13,7 +13,8 @@ import lib.material_interactions as mi
 
 class Foil():
 
-    def __init__(self, xmin: float, xmax: float, ymin: float, ymax: float, thick: float, scatterChoice=0, activate_foil=0):
+    def __init__(self, xmin: float, xmax: float, ymin: float, ymax: float, thick: float, scatterChoice=0, activate_foil=0,
+                 context = 'CPU'):
         """
         Foil class constructor.
 
@@ -25,6 +26,8 @@ class Foil():
             thick (float): Thickness of the foil in ug/cm^2
             scatterChoice (int): The user choice of scattering routine, 
                                  0 for full scatter (default), 1 for simple scatter (no losses)
+            activate_foil (int): 1 to activate foil, 0 to deactivate foil
+            context (string): Context to use for the calculations (default = 'CPU')
         
         Returns:
             Nothing
@@ -42,6 +45,19 @@ class Foil():
         self.nHits = 0 # number of hits on the foil
         self.nLost = 0 # number of lost particles  
 
+        if context == 'GPU':
+            try:
+                import cupy as cp
+            except ImportError:
+                print("# Foil : cupy module is required to run in GPU. ")
+            self.np = cp
+        elif context == 'CPU':
+            try:
+                import numpy as np
+            except ImportError:
+                print("# Foil : numpy module is required to run in CPU. ")
+            self.np = np
+        print('Foil object created in %s context.'%context)
 
     def setScatterChoice(self, choice):
         self.scatterChoice_ = choice
@@ -60,23 +76,22 @@ class Foil():
             else:
                 self.transverseFoilSimpleScatter(particles)
         else:
+            #print('Foil is not activated.')
             pass
 
     def checkFoilFlag(self, x, y):
         """
-        Checks if the particle is inside the foil.
+        Filters the particles that fall within the foil. 
 
         Parameters:
-            x (float): Horizontal position of the particle
-            y (float): Vertical position of the particle
+            x (array): x coordinates of particles
+            y (array): y coordinates of particles
         
         Returns:
-            int: 1 if the particle is inside the foil, 0 otherwise
+            Returnes a mask of all particles that fall transversely within the foil.
         """
-        if x >= self.xmin_ and x <= self.xmax_ and y >= self.ymin_ and y <= self.ymax_:
-            return 1
-        else:
-            return 0
+        mask_foil = (x >= self.xmin_) & (x <= self.xmax_) & (y >= self.ymin_) & (y <= self.ymax_)
+        return mask_foil
 
 
     def transverseFoilSimpleScatter(self, particles):
@@ -100,60 +115,73 @@ class Foil():
         GeV2gramm = mass_proton_g/mass_proton # to convert GeV to gramms
         TFRadius = muScatter*BohrRadius*pow(cs.get_z(self.ma_), -0.33333) # Thomas-Fermi atom radius (cm):
 
-        # Loop all particles
-        nParts = len(particles.x) # number of particles
-        for ip in range(nParts):
+        # only CPU for now.
+        #context = particles._context
+        #ctx2np = context.nparray_from_context_array
+
+        # mask particles
+        mask_alive = particles.state>=1 # alive particles
+        mask_foil = self.checkFoilFlag(particles.x, particles.y) # within the foil particles
+        mask = mask_alive & mask_foil
+        nparticles = len(particles.x[mask])
+        
+        # Momentum in g*cm/sec
+        pInj0 = particles.gamma0[mask] * (particles.mass0*1e-9*GeV2gramm) * particles.beta0[mask]*cnst.c*1e2
+        
+        # Minimum scattering angle:
+        thetaScatMin = hBar/(pInj0*TFRadius)
+
+        # Theta max as per Jackson (13.102)
+        # Original script raises it to the 1/3 power, why not to the 1/2 ? Re-check Jackson
+        thetaScatMax = 274.0*emass*100.0*cnst.c/(pInj0*pow(cs.get_a(self.ma_), 0.33333))
+        
+        # momentum times particle velocity (in units of g * cm^2 / sec^2)
+        pv = pInj0 * particles.beta0[mask]*cnst.c*1.e2
+
+        # Factor in parenthesis of (13.104)
+        # z=1 (protons) while Z=cs.get_z(self.ma_)
+        term = cs.get_z(self.ma_)*echarge**2/pv # in units statC^2 / (g*cm^2/sec^2) = cm
+        
+        # total scattering cross section as per Jackson (10.104) in units of cm^2
+        sigmacoul = 4*math.pi*term**2/(thetaScatMin**2)
+
+        # Scattering area per area (no units)
+        nscatters = nAvogadro*(cs.get_rho(self.ma_)/1000.0)/cs.get_a(self.ma_)*self.thick_/(1.0e3*cs.get_rho(self.ma_))*sigmacoul
+
+        # Mean free path (units of cm)
+        lscatter = (self.thick_/(1.0e3*cs.get_rho(self.ma_)))/nscatters 
+
+        # Distance remaining in foil in cm 
+        zrl = self.np.full(nparticles, self.thick_ / (1.0e3 * cs.get_rho(self.ma_)))
+        thetaX = self.np.zeros(nparticles)
+        thetaY = self.np.zeros(nparticles)
+        zrl_mask = self.np.where(zrl >= 0.0)[0]
+        zrl_mask_len = len(zrl_mask)
+        # Generate interaction points until particle exits foil
+        while zrl_mask_len > 0:
             
-            foil_flag = self.checkFoilFlag(particles.x[ip], particles.y[ip])
-            # If in the foil, tally the hit and start tracking
-            if foil_flag == 1:
-                self.nHits += 1
+            zrl[zrl_mask] += lscatter[zrl_mask] * self.np.log(self.np.random.uniform(0,1, size=zrl_mask_len))
+            
+            # Generate random angles
+            phi = 2 * math.pi * self.np.random.uniform(0,1,size=zrl_mask_len)
+            random1 = self.np.random.uniform(0,1,size=zrl_mask_len)
+            theta = thetaScatMin[zrl_mask] * self.np.sqrt(random1 / (1.0 - random1))
+            theta_mask = self.np.where(theta > (2.0 * thetaScatMax[zrl_mask]))[0]
+            if len(theta_mask) > 0:
+                theta[theta_mask] = 2.0 * thetaScatMax[zrl_mask] * self.np.ones(len(theta_mask))
+            else:
+                #print('No theta_mask')
+                pass
+            thetaX[zrl_mask] += theta * self.np.cos(phi)
+            thetaY[zrl_mask] += theta * self.np.sin(phi)
 
-                # Momentum in g*cm/sec
-                pInj0 = particles.gamma0[ip] * (particles.mass0*1e-9*GeV2gramm) * particles.beta0[ip]*cnst.c*1e2
-                
-                # Minimum scattering angle:
-                thetaScatMin = hBar/(pInj0*TFRadius)
-
-                # Theta max as per Jackson (13.102)
-                # Original script raises it to the 1/3 power, why not to the 1/2 ? Re-check Jackson
-                thetaScatMax = 274.0*emass*100.0*cnst.c/(pInj0*pow(cs.get_a(self.ma_), 0.33333))
-                
-                # momentum times particle velocity (in units of g * cm^2 / sec^2)
-                pv = pInj0 * particles.beta0[ip]*cnst.c*1.e2
-
-                # Factor in parenthesis of (13.104)
-                # z=1 (protons) while Z=cs.get_z(self.ma_)
-                term = cs.get_z(self.ma_)*echarge**2/pv # in units statC^2 / (g*cm^2/sec^2) = cm
-                
-                # total scattering cross section as per Jackson (10.104) in units of cm^2
-                sigmacoul = 4*math.pi*term**2/(thetaScatMin**2)
-
-                # Scattering area per area (no units)
-                nscatters = nAvogadro*(cs.get_rho(self.ma_)/1000.0)/cs.get_a(self.ma_)*self.thick_/(1.0e3*cs.get_rho(self.ma_))*sigmacoul
-
-                # Mean free path (units of cm)
-                lscatter = (self.thick_/(1.0e3*cs.get_rho(self.ma_)))/nscatters 
-
-                # Distance remaining in foil in cm
-                zrl = self.thick_ / (1.0e3 * cs.get_rho(self.ma_)) 
-                thetaX = 0.
-                thetaY = 0.
-                # Generate interaction points until particle exits foil
-                while zrl >= 0.0:
-                    zrl += lscatter * math.log(random.uniform(0,1))
-                    if zrl < 0.0:
-                        break
-                    # Generate random angles
-                    phi = 2 * math.pi * random.uniform(0,1)
-                    random1 = random.uniform(0,1)
-                    theta = thetaScatMin * math.sqrt(random1 / (1.0 - random1))
-                    if theta > 2.0 * thetaScatMax:
-                        theta = 2.0 * thetaScatMax
-                    thetaX += theta * math.cos(phi)
-                    thetaY += theta * math.sin(phi)
-                particles.px[ip] += thetaX
-                particles.py[ip] += thetaY
+            zrl_mask = self.np.where(zrl >= 0.0)[0]
+            zrl_mask_len = len(zrl_mask)
+        
+        particles.px[mask] += thetaX
+        particles.py[mask] += thetaY
+        print('Number of particles hitting foil: ', nparticles)
+        self.nHits += nparticles
 
 
     def transverseFoilFullScatter(self, particles):
@@ -428,3 +456,5 @@ class Foil():
         zrl = -1.0
 
         return foil_flag, zrl
+
+# %%
