@@ -72,6 +72,10 @@ if p['particle_distribution'] == 'simulated':
         particles.zeta = np.random.uniform(-Cpsb/2, Cpsb/2, p['n_part'])
         #particles.delta = np.random.uniform(-1.36e-3, 1.36e-3, n_part) # not parabolic
         print("'Forcing' coasting beam using numpy (uniform zeta).")
+
+    # Add injection missteering
+    particles.x += p['injection_missteering_x']
+    particles.y += p['injection_missteering_y']
     
     with open('input/particles_initial.json', 'w') as fid:
         json.dump(particles.to_dict(), fid, cls=xo.JEncoder)
@@ -121,10 +125,14 @@ elif p['particle_distribution'] == 'real':
     particles = xt.Particles(q0=1, mass0=xt.PROTON_MASS_EV, p0c=line.particle_ref.p0c[0],ptau=ptau)
     particles.x = df.x.values * 1e-3
     particles.y = df.y.values * 1e-3
-    # assuming that we inject on the closed orbit
-    # steering errors to be included in the future...
+    
+    # injection at closed orbit
     particles.x += co_x_at_foil
     particles.y += co_y_at_foil
+
+    # add injection missteering
+    particles.x += p['injection_missteering_x']
+    particles.y += p['injection_missteering_y']
 
     # Following analysis from PyOrbit
     # TO BE REVIEWED
