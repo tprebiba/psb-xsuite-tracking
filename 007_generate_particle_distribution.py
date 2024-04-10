@@ -137,7 +137,7 @@ elif p['particle_distribution'] == 'real':
     # Following analysis from PyOrbit
     # TO BE REVIEWED
     z_lim = p['choppingFactor']*2*np.pi*25
-    z_offset = -0.8 # for ramp #0.0
+    z_offset = p['z_offset']
     z_min, z_max,  = -z_lim/2.+z_offset, z_lim/2.+z_offset 
     speed_of_light = 299792458 # m/s
     Linac4_bucket_length = line.particle_ref._beta0[0]*speed_of_light/(1e6*float(linac4parameters['Beam_Frequency(MHz)']))

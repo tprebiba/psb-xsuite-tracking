@@ -45,6 +45,7 @@ p['zeta0'] = 10.0 # if triple RF, 6d-twiss at zeta0=0 fails because is unstable 
 
 # L4 parameters and number of injections
 p['choppingFactor'] = 0.7
+p['z_offset'] = 0.0 #-0.8 # for ramp #0.0
 p['Linac4_current'] = 25e-3 # Amps
 p['num_injections'] = int(np.ceil(p['bunch_intensity']/p['choppingFactor']/p['Linac4_current']/6.25e12))
 p['num_injections'] = 2 # if > 1: a multi-turn injection is setup
