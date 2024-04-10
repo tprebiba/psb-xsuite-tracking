@@ -5,11 +5,11 @@ p = {}
 
 # Tracking parameters
 p['num_turns'] = 6000 # number of turns to track
-p['turns2saveparticles'] = list(np.arange(0,30,1)) + [40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, p['num_turns']-1] # turns to save particles object
+p['turns2saveparticles'] = [50, 100, 1100, 2020, 3030, 4040, 5050, p['num_turns']-1] # turns to save particles object
 p['turns2plot'] = [] # turns to plot phase space (while tracking)
 
 # Beam intensity and emittance
-p['n_part'] = int(5e4) # number of macroparticles
+p['n_part'] = int(2e3) # number of macroparticles
 p['bunch_intensity'] = 40.0e10 # number of particles per bunch
 p['macrosize'] = p['bunch_intensity']/p['n_part'] # number of charges per macroparticle
 p['particle_distribution'] = 'real' # 'simulated' or 'real
@@ -38,21 +38,22 @@ p['injection_missteering_x'] = 0.0e-3 # horizontal injection missteering in m
 p['injection_missteering_y'] = 0.0e-3 # vertical injection missteering in m
 
 # Setup acceleration
-p['prepare_acceleration'] = 1 # 0: all RF OFF, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF at 8kV)
+p['prepare_acceleration'] = 3 # 0: all RF OFF, 1: nominal PSB acceleration (double RF), 2: flat bottom (single RF at 8kV), 3: triple harmonic with acceleration
 p['twiss_mode'] = '4d' # '4d' or '6d, used only if all RF are OFF
 p['zeta0'] = 17.5 # if double RF, 6d-twiss at zeta0=0 fails because is unstable fixed point; this is a guess of the stable fixed point
+p['zeta0'] = 10.0 # if triple RF, 6d-twiss at zeta0=0 fails because is unstable fixed point; this is a guess of the stable fixed point
 
 # L4 parameters and number of injections
 p['choppingFactor'] = 0.7
 p['Linac4_current'] = 25e-3 # Amps
 p['num_injections'] = int(np.ceil(p['bunch_intensity']/p['choppingFactor']/p['Linac4_current']/6.25e12))
-p['num_injections'] = 150 # if > 1: a multi-turn injection is setup
+p['num_injections'] = 2 # if > 1: a multi-turn injection is setup
 
 # Injection chicane and correction
-p['include_injection_chicane'] = 1 # if 1, 002A_include_injection_chicane.py is executed
+p['include_injection_chicane'] = 0 # if 1, 002A_include_injection_chicane.py is executed
 p['on_chicane_k0'] = 1 # if 1, activates edge focusing of injection chicane
 p['on_chicane_k2'] = 1 # if 1, activates eddy currents of injection chicane
-p['include_injection_chicane_correction'] = 1 # if 1, 002B_include_injection_chicane_correction.py is executed
+p['include_injection_chicane_correction'] = 0 # if 1, 002B_include_injection_chicane_correction.py is executed
 p['on_chicane_tune_corr'] = 1 # if 1, activates tune correction of injection chicane
 p['on_chicane_beta_corr'] = 1 # if 1, activates beta correction of injection chicane
 
@@ -61,7 +62,7 @@ p['install_injection_foil'] = False # if True, injection foil is installed
 p['scatterchoice'] = 1 # 1: simple (no losses) 0: full (with losses) not working (for now)!
 
 # Transverse painting
-p['prepare_painting'] = 1 # if 1, 002C_prepare_painting.py is executed
+p['prepare_painting'] = 0 # if 1, 002C_prepare_painting.py is executed
 p['on_painting_bump'] = 1 # if 1, activates painting bump
 # Following convention: (t0,A0), (t1,A1), (t2,A2), (t3,A3), (1000,0)
 # ISOLDE-like painting (check PSB_MD logbook entry 3806505 from 20/07/2023)
