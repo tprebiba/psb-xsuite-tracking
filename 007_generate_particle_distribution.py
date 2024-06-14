@@ -11,7 +11,6 @@ print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 print('007_generate_particle_distribution.py')
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 
-
 #########################################
 # Load PSB line in xsuite and cycle at foil
 #########################################
@@ -19,7 +18,6 @@ print('Loading PSB line from psb/psb_line_thin.json.')
 line = xt.Line.from_json('psb/psb_line_thin.json')
 line.build_tracker()
 Cpsb = line.get_length() # 157.08 m
-
 
 #########################################
 # Generate particle distribution
@@ -33,6 +31,10 @@ if p['particle_distribution'] == 'simulated':
         print('Changing starting point of line to generate (simulated) matched distribution with correct optics.')
         line.discard_tracker() # We need to discard the tracker to edit the line
         line.cycle(name_first_element = p['element_to_cycle'], inplace=True)
+        # If injection perturbations are included, and line is cycled to the foil (bi1.tstr1l1), line.twiss() needs
+        # to be called either with co_search_at some other location (for example 'psb1$start') or to give a good 
+        # initial guess of the closed orbit at the foil. This is because of the large bump at the foil (~81 mm).
+        # Thus, the particle generators below will fail...
         line.build_tracker()
         line.to_json('psb/psb_line_thin.json')
         print('Line saved to psb/psb_line_thin.json')
@@ -52,13 +54,11 @@ if p['particle_distribution'] == 'simulated':
                                     total_intensity_particles=p['bunch_intensity'],
                                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'], sigma_z=p['sigma_z'],
                                     particle_ref=line.particle_ref,
-                                    line=line,
-                                    #line=line_sc_off
+                                    line=line
                                     )
         print('Parabolic longitudinal distribution.')
     elif p['longitudinal_shape'] == 'coasting':
         # To be improved...
-        
         # Generate particles
         particles = parabolic_longitudinal_distribution(_context=context, num_particles=p['n_part'],
                                     total_intensity_particles=p['bunch_intensity'],
@@ -82,7 +82,6 @@ if p['particle_distribution'] == 'simulated':
     print('Number of macroparticles: ', p['n_part'])
     print('Particles generated and saved to inputs/particles_initial.json.')
 
-
 elif p['particle_distribution'] == 'real':
     print('Real particle distribution.')
     
@@ -102,7 +101,7 @@ elif p['particle_distribution'] == 'real':
     print('Line saved to psb/psb_line_thin.json')
     
     fname = 'L4_particle_distribution/atPSBfoil-450keV.txt'
-    #fname = 'L4_particle_distribution/450keV.txt'
+    #fname = 'L4_particle_distribution/250keV.txt'
     print('Reading %s.'%fname)
     df = pd.read_table(fname, skiprows=3,
         names="x x' y y' z z' Phase Time Energy Loss".split())

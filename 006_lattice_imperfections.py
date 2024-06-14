@@ -5,12 +5,10 @@ print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 print('006_lattice_imperfections.py')
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 
-
 #########################################
 # Load PSB line in xsuite
 #########################################
 line = xt.Line.from_json('psb/psb_line_thin.json') # to get the lengths of the injection bumpers
-
 
 #########################################
 # Correct vertical chromaticity
@@ -23,7 +21,6 @@ if p['correct_chroma']:
 else:
     print('Natural chromaticity.')
 
-
 #########################################
 # Add field errors
 #########################################
@@ -34,7 +31,6 @@ if p['include_field_errors']:
         print('Added %s = %s to the lattice.'%(key, p['field_errors'][key]))
 else:
     print('No field errors.')
-
 
 #########################################
 # Save line to .json

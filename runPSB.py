@@ -2,7 +2,6 @@
 import xtrack as xt
 import xobjects as xo
 import xfields as xf
-#import lib.xfields.xfields as xf
 import xpart as xp
 import numpy as np
 import json
@@ -140,6 +139,7 @@ elif p['num_injections']>1:
 #########################################
 if p['install_injection_foil']==True:    
     from lib.foil import Foil
+    #from lib.foil2 import Foil
 
     print('Creating PSB foil...')
     thickness = 200 #ug/cm^2
@@ -205,6 +205,7 @@ for ii in range(num_turns):
             p_injection.num_particles_to_inject = 0
             print('Injection finished.')
             if p['install_injection_foil']==True:
+                # to be reviewed
                 psbfoil.setActivateFoil(0) # deactivates foil
                 print('Foil deactivated.')
         elif ii<p['num_injections']:

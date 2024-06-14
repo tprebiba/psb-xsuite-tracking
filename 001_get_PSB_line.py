@@ -3,11 +3,9 @@ import xtrack as xt
 import xpart as xp
 from simulation_parameters import parameters as p
 
-
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 print('001_get_PSB_line.py')
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
-
 
 #########################################
 # Load line
@@ -25,17 +23,15 @@ line= xt.Line.from_madx_sequence(mad.sequence['psb1'],
                                  #enable_field_errors=True, # field errors are not yet supported for thick elements
                                  enable_align_errors=True,
                                  allow_thick=True,
-                                 use_compound_elements=True)
+                                 )
 print('PSB1 line loaded.')
 print('Line length: ', line.get_length())
-
 
 #########################################
 # Add reference particle
 #########################################
 line.particle_ref=xp.Particles(mass0=xp.PROTON_MASS_EV,gamma0=mad.sequence.psb1.beam.gamma)
 print('Reference particle added at gamma0=%s.'%(mad.sequence.psb1.beam.gamma))
-
 
 #########################################
 # Configure bends if thick
@@ -45,7 +41,6 @@ if mad.globals.thin == 0:
     #line.configure_bend_model(core='expanded', edge='full')
     print('Bend model configured for thick elements.')
 
-
 #########################################
 # Inspect elements, twiss and save
 #########################################
@@ -54,11 +49,9 @@ line_table = line.get_table()
 line.element_names
 #line.element_dict
 line.twiss_default['method'] = '4d' # no cavity
-line.twiss_default['group_compound_elements'] = True
 tw = line.twiss() # ContextCpu by default
 tw.to_pandas().to_pickle('psb/psb_twiss_thick.pkl')
 print('Twiss computed and saved to psb/psb_twiss_thick.pkl.')
 print('Working point of thick lattice: (Qx, Qy) = (%s, %s)'%(tw.qx, tw.qy))
 line.to_json('psb/psb_line_thick.json')
 print('Line saved to psb/psb_line_thick.json')
-# %%

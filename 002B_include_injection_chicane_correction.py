@@ -19,7 +19,6 @@ elif p['include_injection_chicane_correction']==1:
     line = xt.Line.from_json('psb/psb_line_thick.json')
     line.build_tracker()
 
-
     #########################################
     # Insert marker at location where
     # we want to mimize beta-beating
@@ -27,7 +26,6 @@ elif p['include_injection_chicane_correction']==1:
     line.discard_tracker() # We need to discard the tracker to edit the line
     line.insert_element(element=xt.Marker(), name='mker_match', at_s=79.874)
     line.build_tracker()
-
 
     #########################################
     # Store twiss with chicane off
@@ -38,14 +36,11 @@ elif p['include_injection_chicane_correction']==1:
     line.vars['on_chicane_k0'] = p['on_chicane_k0']
     line.vars['on_chicane_k2'] = p['on_chicane_k2']
 
-
     #########################################
     # Compute correction using xsuite match
     #########################################
     print('Computing correction using xsuite match...')
-
     t_correct = np.linspace(0, 5.5e-3, 30) # Times at which corrections are computed
-
     kbrqf_corr_list = []
     kbrqd_corr_list = []
     kbrqd3corr_list = []
@@ -83,7 +78,6 @@ elif p['include_injection_chicane_correction']==1:
     line.vars['t_turn_s']=0.0 # Reset time at the injection
     print('Correction computed using xsuite match.')
 
-
     #########################################
     # Build function with the computed 
     # corrections
@@ -93,7 +87,6 @@ elif p['include_injection_chicane_correction']==1:
     line.functions['fun_qd3_corr'] = xd.FunctionPieceWiseLinear(x=t_correct, y=kbrqd3corr_list)
     line.functions['fun_qd14_corr'] = xd.FunctionPieceWiseLinear(x=t_correct, y=kbrqd14corr_list)
     print('Beta-beating correction functions built to control quad strengths.')
-
 
     #########################################
     # Use functions to control quad strengths
@@ -111,7 +104,6 @@ elif p['include_injection_chicane_correction']==1:
                             * line.functions.fun_qd14_corr(line.vars['t_turn_s']))
     print('Variables "on_chicane_tune_corr" and "on_chicane_beta_corr" control the scaling of the tune & beta-beating correction.')
     print('Beta-beating correction function assigned to quadrupoles.')
-
 
     #########################################
     # Save line to .json

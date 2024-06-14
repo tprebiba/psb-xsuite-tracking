@@ -8,9 +8,8 @@ print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 print('003_prepare_acceleration.py')
 print('*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~**~*~*~**~*~*~**~*~*~*')
 
-
-if p['prepare_acceleration']==1:
-    print('prepare_acceleration = 1')
+if p['prepare_acceleration']==2:
+    print('prepare_acceleration = 2')
     print('Double RF; with acceleration.')
 
     #########################################
@@ -198,7 +197,7 @@ elif p['prepare_acceleration']==3:
     print('Line saved to psb/psb_line_thick.json')
 
 else: 
-    print('prepare_acceleration = 0 or 2')
+    print('prepare_acceleration = 0 or 1')
     print('Single RF; no acceleration included.')
 
     #########################################

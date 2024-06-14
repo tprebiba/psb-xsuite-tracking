@@ -82,7 +82,8 @@ for file in files:
     ax.set_xlim(-90,22)
     ax.set_ylim(-22,22)
     ax = axs[1,1]
-    ax.hist2d(z, dE,bins=bins, cmap=my_cmap, vmin=vmin)
+    #ax.hist2d(z, dE,bins=bins, cmap=my_cmap, vmin=vmin)
+    ax.plot(z, dE,'.', c='blue', ms=1)
     ax.set_xlabel('z [m]')
     ax.set_ylabel('dE [MeV] ')
     #ax.set_ylim(-2,2)

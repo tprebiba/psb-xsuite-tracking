@@ -20,7 +20,6 @@ elif p['prepare_tune_ramp']==1:
       line = xt.Line.from_json('psb/psb_line_thin.json')
       line.build_tracker()
 
-
       #########################################
       # Deactivate chicane and correction
       # Deactivate painting bump
@@ -32,7 +31,6 @@ elif p['prepare_tune_ramp']==1:
       line.vars['on_painting_bump'] = 0
       print('Chicane and correction deactivated.')
       print('Painting bump deactivated.')
-
 
       #########################################
       # Generate tune ramp
@@ -87,7 +85,6 @@ elif p['prepare_tune_ramp']==1:
       print('Dictionary: ', d)
       print('Wrote time_tables/tunes.json')
 
-
       #########################################
       # Reactivate chicane and correction
       # Reactivate painting bump
@@ -104,7 +101,6 @@ elif p['prepare_tune_ramp']==1:
       tw = line.twiss()
       print('Working point of thin lattice: (Qx, Qy) = (%s, %s)'%(tw.qx, tw.qy))
 
-
       #########################################
       # Generating xsuite functions and
       # assigning to main quads
@@ -115,7 +111,6 @@ elif p['prepare_tune_ramp']==1:
       line.vars['on_tune_ramp'] = p['on_tune_ramp'] # to easily switch off the tune ramp
       line.vars['kbrqf'] = line.functions.kbrqf_func(line.vars['t_turn_s']) * line.vars['on_tune_ramp']
       line.vars['kbrqd'] = line.functions.kbrqd_func(line.vars['t_turn_s']) * line.vars['on_tune_ramp'] 
-
 
       #########################################
       # Save line to .json

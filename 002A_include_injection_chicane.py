@@ -19,13 +19,11 @@ elif p['include_injection_chicane']==1:
     line = xt.Line.from_json('psb/psb_line_thick.json')
     line.build_tracker()
 
-
     #########################################
     # A few checks on the imported model
     #########################################
     #line.vars['k0bi1bsw1l11']._info() # Check that the knob controls k0 and the edges
     #line.element_refs['bi1.bsw1l1.1'].h._info() # Check no reference system curvature in bumpers
-
 
     #########################################
     # Build knobs to model k0 and k2 
@@ -43,7 +41,6 @@ elif p['include_injection_chicane']==1:
     line.element_refs['bi1.bsw1l1.4'].knl[2] = line.vars['bsw_k2l']
     print('Knobs built to control k0 and k2.')
 
-
     #########################################
     # Add time dependence
     #########################################
@@ -57,7 +54,6 @@ elif p['include_injection_chicane']==1:
     line.vars['bsw_k2l'] = line.functions.fun_bsw_k2l(line.vars['t_turn_s']) * line.vars['on_chicane_k2'] 
     print('Variables "on_chicane_k0" and "on_chicane_k2" added to switch off edge focusing and eddy currents.')
     print('Time dependence added to k0 and k2.')
-
 
     #########################################
     # Save line to .json

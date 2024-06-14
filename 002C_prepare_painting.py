@@ -19,7 +19,6 @@ elif p['prepare_painting']==1:
     line = xt.Line.from_json('psb/psb_line_thick.json')
     line.build_tracker()
 
-
     #########################################
     # Load KSW bump file
     #########################################
@@ -28,7 +27,6 @@ elif p['prepare_painting']==1:
         #names=['X_BUMP', 'KBIKSW1L4', 'KBIKSW2L1', 'KBIKSW16L1', 'KBIKSW16L4'])
         names=['X_BUMP', 'kbi1ksw1l4', 'kbi1ksw2l1', 'kbi1ksw16l1', 'kbi1ksw16l4']) # different naming convention
     print('KSW bump file loaded.')
-
 
     #########################################
     # A few checks
@@ -45,7 +43,6 @@ elif p['prepare_painting']==1:
     # co_x_at_foil = tw['x', 'bi1.tstr1l1_entry']
     # co_y_at_foil = tw['y', 'bi1.tstr1l1_entry']
     # print('Closed orbit at foil: x = %s m, y = %s m.'%(co_x_at_foil, co_y_at_foil)) # should be x=+35mm
-
 
     #########################################
     # Prepare knobs and add time dependence
@@ -70,7 +67,6 @@ elif p['prepare_painting']==1:
     print('Knobs built to control KSW bump.')
     print('Variable "on_painting_bump" added to control KSW bump.')
     print('Time dependence added to kbi1ksw1l4, kbi1ksw2l1, kbi1ksw16l1 and kbi1ksw16l4.')
-
 
     #########################################
     # Save line to .json
