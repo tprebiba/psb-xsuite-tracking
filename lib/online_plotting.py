@@ -27,7 +27,7 @@ def plot_phasespace(particles, turn, png_dir,
         state = state.get()
     
     if mask_lost_particles:
-        mask = particles.state > 0
+        mask = state > 0
         x = x[mask]
         y = y[mask]
         xp = xp[mask]

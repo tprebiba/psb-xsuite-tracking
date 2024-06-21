@@ -8,14 +8,15 @@ MY.XRDCP_CREATE_DIR     = True
 transfer_output_files   = output/
 #+SingularityImage = "/cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch//fasvesta/space-charge-docker-image:latest"
 #+SingularityImage = "/cvmfs/unpacked.cern.ch/registry.cern.ch/tprebiba/xsuite:2022.1"
-+SingularityImage = "/cvmfs/unpacked.cern.ch/registry.cern.ch/ecloud-scrubbing/xsuite:2024.1"
+#+SingularityImage = "/cvmfs/unpacked.cern.ch/registry.cern.ch/ecloud-scrubbing/xsuite:2024.1"
++SingularityImage = "/cvmfs/unpacked.cern.ch/registry.cern.ch/ecloud-scrubbing/xsuite:2024SC"
 on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)
 max_retries = 0
 #requirements = Machine =!= LastRemoteHost && regexp("100", Target.CUDADeviceName)
 requirements = Machine =!= LastRemoteHost && regexp("100", Target.GPUs_DeviceName) && TARGET.OpSysAndVer =?= "AlmaLinux9"
 request_GPUs = 1
 request_CPUs = 1
-+MaxRunTime = 600000
++MaxRunTime = 700000
 #+JobFlavour             = "tomorrow"
 #requirements = regexp("100", TARGET.GPUs_DeviceName)
 queue
