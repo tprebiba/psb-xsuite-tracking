@@ -2,6 +2,7 @@
 import xtrack as xt
 import xobjects as xo
 import xfields as xf
+#import lib.xfields.xfields as xf
 import xpart as xp
 import numpy as np
 import json
@@ -51,7 +52,7 @@ if p['install_space_charge']:
                     nemitt_x=p['nemitt_x'], nemitt_y=p['nemitt_y'],
                     sigma_z=p['sigma_z'],
                     num_spacecharge_interactions=p['num_spacecharge_interactions'],
-                    delta_rms=1e-3
+                    #delta_rms=1e-3
                     )
     if mode == 'frozen':
         pass # Already configured in line
@@ -63,13 +64,14 @@ if p['install_space_charge']:
     elif mode == 'pic':
         pic_collection, all_pics = xf.replace_spacecharge_with_PIC(
             _context=context, line=line,
-            n_sigmas_range_pic_x=8, # to be reviewed
-            n_sigmas_range_pic_y=8, # to be reviewed
+            n_sigmas_range_pic_x=10, 
+            n_sigmas_range_pic_y=10,
             nx_grid=128, ny_grid=128, nz_grid=64, # to be reviewed
-            n_lims_x=7, n_lims_y=5,#3,
+            n_lims_x=7, n_lims_y=7,
             #z_range=(-3*p['sigma_z'], 3*p['sigma_z']), 
             z_range=(-Cpsb/2, Cpsb/2), 
             solver=p['pic_solver'],
+            #grid_extend_in_x = 0.045, grid_extend_in_y = 0.045
             )
     else:
         raise ValueError(f'Invalid mode: {mode}')
@@ -176,6 +178,17 @@ if p['prepare_acceleration'] == 0:
     print('All cavities switched off.')
     line.twiss_default['method'] = '4d'
     print('Twiss method set to 4d.')
+    
+    # make sure space charge kicks work properly with coasting beam
+    # synctime available only for GPU for now...
+    if p['install_space_charge']:   
+        #import xtrack.synctime as st
+        #st.install_sync_time_at_collective_elements(line)
+        #zeta_max0 = -Cpsb/2#*te.beta0/beta1
+        #particles.zeta = particles.zeta/particles.rvv+(zeta_max0-Cpsb)/particles.rvv
+        #st.prepare_particles_for_sync_time(line, particles)
+        pass
+
 line.enable_time_dependent_vars = True
 #line.dt_update_time_dependent_vars = 3e-6 # approximately every 3 turns
 line.vars.cache_active = False
