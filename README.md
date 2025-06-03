@@ -1,31 +1,47 @@
-# Realistic PSB simulation in [Xsuite](https://xsuite.readthedocs.io/en/latest/).
+# Realistic Proton Synchrotron Booster (PSB) Beam Dynamics Simulation with Xsuite
 
-For corrections & suggestions contact: [tirsi.prebibaj@cern.ch](mailto:tirsi.prebibaj@cern.ch)
+This repository provides a full simulation pipeline for realistic modeling of beam dynamics in CERN’s Proton Synchrotron Booster (PSB) using [Xsuite](https://xsuite.readthedocs.io/en/latest/).  
 
-With inputs from F. Asvesta, H. Bartosik, G. Iadarola, K. Paraschou. 
+It includes tools for:
+- Lattice generation
+- Multi-turn injection and transverse painting modeling  
+- Foil scattering
+- Acceleration
+- Time-dependent settings (e.g. tune ramps)
+- Machine imperfections  
+- Space charge effects  
+- Tracking and output analysis  
+- Scripts for submittion to [HTCondor](https://abpcomputing.web.cern.ch/computing_resources/cernbatch/) (CPU or GPU)
 
-Simulation is split in two parts:
+**Contact for corrections & suggestions**: [tirsi.prebibaj@cern.ch](mailto:tirsi.prebibaj@cern.ch)  
+With inputs from: F. Asvesta, H. Bartosik, G. Iadarola, K. Paraschou
 
-1. **Part I: preparing the simulation**
-   - Generate the desired lattice and particle distribution (set tune, injection bump, foil scattering, acceleration, imperfections, time-functions, emittances, bunch shape, …).​
-   - Inputs are given by ```simulation_parameters.py```.
-   - Execution:
-       ```
-        $ . 000_prepare_simulation.sh
-       ```
-   - Outputs stored in ```psb/``` and ```input/```.
-   - Runs locally on CPU.
+---
 
-3. **Part II: tracking**
-   - Track and save beam state (space charge algorithms, multi-turn injection, …).​
-   - Inputs are given by ```simulation_parameters.py```.
-   - Execution:
-       ```
-        $ python -m runPSB.py
-       ```
-   - Outputs stored in ```output/```.
-   - Runs locally or on HTCondor, in CPU or GPU.
-   - Run on HTCondor using GPUs with:
-        ```
-        $ condor_submit htcondor_submission_gpu.sub
-       ```
+## Structure
+
+The simulation is organized in two main parts:
+
+### Part I: Preparing the Simulation
+
+- Generate the desired lattice and particle distribution (lattice setup, beam transverse and longitudinal characteristics, ...).
+- All settings are controlled via `simulation_parameters.py`.
+- Execution:
+    ```
+    . 000_prepare_simulation.sh 
+    ```
+- Will generate the lattice and machine settings in `psb/` and the initial particle distribution in `input/`
+
+
+### Part II: Tracking
+
+- Perform beam tracking (configured also via `simulation_parameters.py`).
+- Local execution:
+    ```
+    python -m runPSB.py 
+    ```
+    or execution in HTCondor with GPU
+    ```
+    condor_submit htcondor_submission_gpu.sub
+    ```
+- All the outputs (turn-by-turn beam data, beam profiles, ...) are saved in `output/`.
